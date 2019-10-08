@@ -64,8 +64,7 @@ BOOL CDlg_Options_Downloads_Monitoring::OnInitDialog()
 	CheckDlgButton (IDC_IE2, bIE2 ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton (IDC_CLIPBOARD, _App.Monitor_Clipboard () ? BST_CHECKED : BST_UNCHECKED);
 	
-	BOOL bFF = _App.Monitor_Firefox () && vmsFirefoxMonitoring::IsInstalled () &&
-		vmsFirefoxMonitoring::IsFlashGotInstalled () == false;
+	BOOL bFF = _App.Monitor_Firefox() && vmsFirefoxMonitoring::IsInstalled();
 	if (bFF)
 	{
 		bool bEnabled;

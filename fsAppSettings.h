@@ -700,6 +700,14 @@ public:
 	BOOL Monitor_ChromeExtensionSuggested();
 	void ShowUserNotification (LPCTSTR notificationId, BOOL show);
 	BOOL ShowUserNotification (LPCTSTR notificationId);
+	BOOL ShowFdm5Banner();
+	void ShowFdm5Banner(BOOL val);
+	time_t Fdm5BannerLastTime();
+	void Fdm5BannerLastTime(time_t val);
+	BOOL Fdm5BannerShownEver();
+	void Fdm5BannerShownEver(BOOL val);
+	BOOL LegacyFfExtensionChecked();
+	void LegacyFfExtensionChecked(BOOL val);
 
 	fsAppSettings();
 	virtual ~fsAppSettings();

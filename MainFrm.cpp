@@ -964,14 +964,23 @@ void CMainFrame::OnSupport()
 
 void CMainFrame::OnUpdate() 
 {
-	
-	if (_UpdateMgr.IsStartUpdaterNeeded (FALSE))
+	auto dostuff = [=](bool offerAccepted)
 	{
-		MessageBox (LS (L_ALRUPDATED), NULL, MB_ICONEXCLAMATION);
-		return;
-	}
+		if (!offerAccepted)
+		{
+			
+			if (_UpdateMgr.IsStartUpdaterNeeded(FALSE))
+			{
+				MessageBox(LS(L_ALRUPDATED), NULL, MB_ICONEXCLAMATION);
+				return;
+			}
 
-	StartUpdate (TRUE);
+			StartUpdate(TRUE);
+		}
+	};
+
+	if (!ShowFdm5BannerIfRequired(true, dostuff))
+		dostuff(false);
 }
 
 void CMainFrame::OnProggeneralsettings() 
@@ -1658,20 +1667,7 @@ unsigned WINAPI CMainFrame::_threadUpdate(vmsCreatesThreads *pthis2)
 	{
 		LOGsnl ("checking ff ext updates");
 
-		bool bOK;
-
-		assert (_spFfExtUpdateMgr);
-		bOK = _spFfExtUpdateMgr->CheckForUpdates ();
-
-		LOG ("%s", bOK ? "succeeded" : "failed");
-
-		if (bOK)
-		{
-			LOG ("has new version: %s", _spFfExtUpdateMgr->isNewVersionAvailable () ? "yes" : "no");
-
-			if (_spFfExtUpdateMgr->isNewVersionAvailable () && _spFfExtUpdateMgr->PerformUpdate ())
-				vmsFirefoxMonitoring::Install (true);
-		}
+		bool bOK = true;
 
 		if (!vmsYouTubeParserDllMgr::get ()->PerformUpdate ())
 			bOK = false;
@@ -2102,6 +2098,12 @@ void CMainFrame::OnTimer(UINT nIDEvent)
 			}
 			break;
 		}
+
+		case 11:
+		{
+			ShowFdm5BannerIfRequired();
+			break;
+		}
 	}
 }
 
@@ -2447,6 +2449,11 @@ void CMainFrame::OnProceedFurherInitialization()
 	
 	
 	SetTimer (9, 30*1000, NULL);
+
+	ShowFdm5BannerIfRequired();
+	if (m_fdm5BannerMgr.bannerEnabled())
+		SetTimer(11, 1800*1000, nullptr);
+
 }
 
 void CMainFrame::OnAppAbout() 
@@ -3791,3 +3798,20 @@ void CMainFrame::OnActivate(UINT nState, CWnd* pWndOther,BOOL bMinimized )
 	CFrameWnd::OnActivate( nState, pWndOther, bMinimized );
 }
 
+bool CMainFrame::ShowFdm5BannerIfRequired(
+	bool dontCheckTime,
+	std::function<void(bool offerAccepted)> onClose)
+{
+	if (m_fdm5BannerMgr.bannerEnabled() &&
+		!m_fdm5BannerMgr.bannerActive() &&
+		(
+		!_App.Fdm5BannerShownEver() ||
+		dontCheckTime ||
+		std::difftime(std::time(nullptr), _App.Fdm5BannerLastTime()) >= 24 * 3600)
+		)
+	{
+		_App.Fdm5BannerShownEver(TRUE);
+		return m_fdm5BannerMgr.showBanner(onClose);
+	}
+	return false;
+}

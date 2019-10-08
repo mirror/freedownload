@@ -12,7 +12,8 @@ public:
 	
 	
 	
-	static bool IsInstalledInProfile (LPCTSTR pszCID, bool bInDefaultProfileOnly, const tstring& firefoxPortablePath)
+	static bool IsInstalledInProfile (LPCTSTR pszCID, bool bInDefaultProfileOnly, const tstring& firefoxPortablePath,
+		bool includingXpi = true)
 	{
 		FU_STRINGLIST v; int nDefaultProfile;
 		vmsFirefoxUtil::GetProfilesPathes (v, nDefaultProfile);
@@ -44,9 +45,56 @@ public:
 
 			if (GetFileAttributes (sz) != DWORD (-1))
 				return true;
+
+			if (includingXpi)
+			{
+				lstrcat (sz, _T(".xpi"));
+				if (GetFileAttributes(sz) != DWORD(-1))
+					return true;
+			}
 		}
 
 		return false;
+	}
+
+	static bool RemoveXpiInstalledInProfile(LPCTSTR pszCID, bool bInDefaultProfileOnly, const tstring& firefoxPortablePath)
+	{
+		FU_STRINGLIST v; int nDefaultProfile;
+		vmsFirefoxUtil::GetProfilesPathes(v, nDefaultProfile);
+
+		if (!firefoxPortablePath.empty())
+		{
+			fsString str2 = (firefoxPortablePath + _T("\\data\\profile")).c_str();
+			TCHAR sz [MAX_PATH];
+			GetModuleFileName(NULL, sz, MAX_PATH);
+			str2 [0] = sz [0];
+			v.push_back(str2);
+		}
+
+		if (v.size() == 0)
+			return true;
+
+		if (nDefaultProfile == -1 || nDefaultProfile >= v.size())
+			bInDefaultProfileOnly = false;
+
+		bool result = true;
+
+		for (int i = 0; i < v.size(); i++)
+		{
+			if (bInDefaultProfileOnly && i != nDefaultProfile)
+				continue;
+
+			TCHAR sz [MAX_PATH];
+			lstrcpy(sz, v [i]);
+			lstrcat(sz, _T("\\extensions\\"));
+			lstrcat(sz, pszCID);
+			lstrcat(sz, _T(".xpi"));
+
+			if (GetFileAttributes(sz) != DWORD(-1) && !DeleteFile(sz))
+				result = false;
+		}
+
+		return result;
 	}
 	
 	static bool IsInstalledUsingRegistry (LPCTSTR pszCID)

@@ -54,6 +54,7 @@ void vmsFirefoxExtensionUpdateMgr::LoadState(bool currentBuildFirstRun)
 		{
 			pstgs->WriteProfileString (_T ("Settings\\Update\\FirefoxExt"), _T ("Path"), m_tstrExtensionPath.c_str ());
 			pstgs->WriteProfileString (_T ("Settings\\Update\\FirefoxExt"), _T ("Version"), m_extensionVersion.ToString ().c_str ());
+			pstgs->WriteProfileInt (_T ("Settings\\Update\\FirefoxExt"), _T ("SupportsBuggyBrowser"), 1);
 
 			if (extensionPath != m_tstrExtensionPath)
 				m_bExtensionPathChanged = true;

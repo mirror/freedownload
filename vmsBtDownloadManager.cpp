@@ -310,7 +310,8 @@ void vmsBtDownloadManager::ProcessFilePathMacroses(CString &str)
 	}
 }
 
-void vmsBtDownloadManager::DeleteBtDownload()
+void vmsBtDownloadManager::DeleteBtDownload(
+    bool deleteSessionOnZeroDownloads)
 {
 	vmsAUTOLOCKSECTION (m_csDownload);
 
@@ -330,7 +331,8 @@ void vmsBtDownloadManager::DeleteBtDownload()
 			while (m_nUsingBtDownload)
 				Sleep (5);
 			pSession->DeleteDownload (p);			
-			if (pSession->get_DownloadCount() == 0)
+			if (deleteSessionOnZeroDownloads && 
+                    pSession->get_DownloadCount() == 0)
 			{				
 				_BT.UnlockSession(true);
 				_BT.RemoveSession();

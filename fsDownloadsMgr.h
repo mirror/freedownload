@@ -301,6 +301,7 @@ public:
 	
 	
 	size_t GetCount() {return m_vDownloads.size ();};
+	size_t GetCount24h();
 	
 	vmsDownloadSmartPtr GetDownload (size_t iIndex);
 	void SetEventsFunc (fntDownloadsMgrEventFunc pfn, LPVOID lpParam);

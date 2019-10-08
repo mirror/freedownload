@@ -54,7 +54,7 @@ extern LONG fsCopyKey(HKEY hSrcParent, HKEY hTargParent, LPCTSTR szSrcKey, LPCTS
 
 extern BOOL vmsDeleteFileAtWinBoot (LPCTSTR pszFile);
 
-extern char vmsGetExeDriveLetter ();
+extern TCHAR vmsGetExeDriveLetter ();
 
 extern void vmsCopyFiles (LPCTSTR pszSrcFolder, LPCTSTR pszDstFolder, LPCTSTR pszFileMask);
 

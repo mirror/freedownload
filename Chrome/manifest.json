@@ -4,6 +4,7 @@
   "path": "fdm_nativehost.exe",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://ahmpjcflkgiildlgicmcieglgoilbfdp/"
+    "chrome-extension://ahmpjcflkgiildlgicmcieglgoilbfdp/",
+    "chrome-extension://mdfcjfioplkdchnhcpcobaheocanedjg/"
   ]
 }

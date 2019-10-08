@@ -9,12 +9,23 @@
 #include <windows.h>
 #include <objbase.h>
 #include <comdef.h>
+#include <assert.h>
+#include <fstream>
 
 #include "Fdm.h"
 
 #include "picojson.h"
 
+#ifdef DO_LOG
+std::ofstream g_log;
+#define LOG(x) { g_log << x << std::endl; g_log.flush(); }
+#else
+#define LOG(x)
+#endif
+
 _COM_SMARTPTR_TYPEDEF(IFdmUiWindow, __uuidof(IFdmUiWindow));
+_COM_SMARTPTR_TYPEDEF(IWGUrlReceiver, __uuidof(IWGUrlReceiver));
+_COM_SMARTPTR_TYPEDEF(IWGUrlListReceiver, __uuidof(IWGUrlListReceiver));
 
 DWORD _bMonitor = 0;
 DWORD _dwSkipSmaller = 0;
@@ -26,8 +37,12 @@ DWORD _bContextMenuDLPage = 0;
 DWORD _bContextMenuDLSelected = 1; 
 DWORD _bContextMenuDLThis = 1; 
 
+enum {Unknown, Chrome, Firefox} g_browser = Unknown;
+
 void ReadConfig()
 {
+	assert(g_browser == Chrome || g_browser == Firefox);
+
 	DWORD cbData;
 	HKEY hMonitor = NULL;
 	if(RegOpenKeyEx(
@@ -44,7 +59,7 @@ void ReadConfig()
 		RegQueryValueEx(hMonitor, "ALTShouldPressed", NULL, NULL, (LPBYTE)&_bALTShouldBePressed, &cbData);
 
 		cbData = sizeof(DWORD);
-		RegQueryValueEx(hMonitor, "Chrome", NULL, NULL, (LPBYTE)&_bMonitor, &cbData);
+		RegQueryValueEx(hMonitor, g_browser == Chrome ? "Chrome" : "Firefox", NULL, NULL, (LPBYTE)&_bMonitor, &cbData);
 
 		cbData = sizeof(DWORD);
 		RegQueryValueEx(hMonitor, "SkipSmaller", NULL, NULL, (LPBYTE)&_dwSkipSmaller, &cbData);
@@ -102,7 +117,7 @@ std::string ReadSkipServers()
 		if(RegQueryValueEx(hMonitor, "SkipServers", NULL, NULL, NULL, &cbData) == ERROR_SUCCESS && cbData != 0)
 		{
 			res.resize(cbData);
-			RegQueryValueEx(hMonitor, "SkipServers", NULL, NULL, (LPBYTE)res.c_str(), &cbData);
+			RegQueryValueEx(hMonitor, "SkipServers", NULL, NULL, (LPBYTE)&res.front(), &cbData);
 		}
 	}
 	return res;
@@ -174,19 +189,18 @@ BOOL IsExtInExtsStr (LPCSTR pszExts, LPCSTR pszExt)
 
 	int len = lstrlen (pszExts);
 	int i = 0;
-	CHAR szExt [10000];
+	std::string szExt;
 
 	do
 	{
-		int j = 0;
+		szExt.clear();
 
 		while (i < len && pszExts [i] != ' ')
-			szExt [j++] = pszExts [i++];
+			szExt.push_back(pszExts [i++]);
 
-		szExt [j] = 0;
 		i++;
 
-		if (IsExtStrEq (szExt, pszExt))
+		if (IsExtStrEq (szExt.c_str(), pszExt))
 			return TRUE;
 
 	} while (i < len);
@@ -203,19 +217,18 @@ BOOL IsServerInServersStr (LPCSTR pszServers, LPCSTR pszServer)
 
 	int len = lstrlen (pszServers);
 	int i = 0;
-	CHAR szServer [10000];
+	std::string szServer;
 
 	do
 	{
-		int j = 0;
+		szServer.clear();
 
 		while (i < len && pszServers [i] != ' ')
-			szServer [j++] = pszServers [i++];
+			szServer.push_back(pszServers [i++]);
 
-		szServer [j] = 0;
 		i++;
 
-		if (IsExtStrEq (szServer, pszServer))
+		if (IsExtStrEq (szServer.c_str(), pszServer))
 			return TRUE;
 
 		std::string str;
@@ -240,21 +253,21 @@ std::string DomainFromUrl(LPCSTR pszUrl)
 	LPCSTR pszE = pszS;
 	while (*pszE && *pszE != '\\' && *pszE != '/')
 		pszE++;
-
-	char sz [1000];
-	if (pszE - pszS > sizeof (sz))
-		return "";
-
-	lstrcpyn (sz, pszS, pszE - pszS + 1);
+	std::string sz;
+	sz.assign(pszS, pszE);
 	return sz;
 }
 
 bool UrlToFdm (LPCSTR pszUrl, LPCSTR pszOrigUrl, LPCSTR pszCookies, LPCSTR pszReferrer, bool page, LPCSTR post, LPCSTR pszUserAgent)
 {
+try{
+
+	LOG("UrlToFdm");
+
 	if(IsServerInServersStr(ReadSkipServers().c_str(), DomainFromUrl(pszUrl).c_str()))
 		return false;
 
-	IWGUrlReceiver* wg;
+	IWGUrlReceiverPtr wg;
 	HRESULT hr;
 	if (FAILED (hr=CoCreateInstance (CLSID_WGUrlReceiver, NULL, CLSCTX_ALL, IID_IWGUrlReceiver, (void**) &wg)))
 	{
@@ -263,7 +276,7 @@ bool UrlToFdm (LPCSTR pszUrl, LPCSTR pszOrigUrl, LPCSTR pszCookies, LPCSTR pszRe
 		char sz [100];
 		_itoa_s (hr, sz, 100, 16);
 		lstrcat (szMsg, sz);
-		MessageBox (NULL, szMsg, "Error", MB_ICONERROR);
+		MessageBox (NULL, szMsg, "Error", MB_ICONERROR | MB_SETFOREGROUND);
 		return false;
 	}
 
@@ -274,16 +287,15 @@ bool UrlToFdm (LPCSTR pszUrl, LPCSTR pszOrigUrl, LPCSTR pszCookies, LPCSTR pszRe
 	wg->put_UserAgent(_bstr_t(pszUserAgent));
 	if(strlen(post) > 0)
 		wg->put_PostData(_bstr_t(post));
+
 	if(page)
 	{
 		HRESULT res = wg->ShowAddPageDownloadDialog();
-		wg->Release();
 		return !FAILED(res);
 	} else
 	{
 		if(wg->AddDownload () == E_NOTIMPL)
 		{
-			wg->Release();
 			return false;
 		}
 
@@ -312,16 +324,18 @@ bool UrlToFdm (LPCSTR pszUrl, LPCSTR pszOrigUrl, LPCSTR pszCookies, LPCSTR pszRe
 			Sleep(5);
 			wg->get_UIState(&state);
 		} while(in_progress == _bstr_t(state, true));
-	
+
 		_bstr_t st(state, false);
-		wg->Release ();
+
 		return (st == _bstr_t(L"added"));
 	}
+}
+catch(_com_error&){return false;}
 }
 
 bool UrlListToFdm(LPCSTR pszUrlList, LPCSTR pszCookies, LPCSTR pszReferrer)
 {
-	IWGUrlListReceiver* wg;
+	IWGUrlListReceiverPtr wg;
 	HRESULT hr;
 	if(FAILED (hr=CoCreateInstance (CLSID_WGUrlListReceiver, NULL, CLSCTX_ALL, IID_IWGUrlListReceiver, (void**) &wg)))
 	{
@@ -336,8 +350,8 @@ bool UrlListToFdm(LPCSTR pszUrlList, LPCSTR pszCookies, LPCSTR pszReferrer)
 
 	
 	size_t len = strlen(pszUrlList);
-	char* urls = new char[len+1];
-	strcpy(urls, pszUrlList);
+	std::string urls = pszUrlList;
+	urls.push_back(0);
 	for(size_t i = 0; i < len; i++)
 		if(urls[i] == '\n')
 			urls[i] = 0;
@@ -353,14 +367,14 @@ bool UrlListToFdm(LPCSTR pszUrlList, LPCSTR pszCookies, LPCSTR pszReferrer)
 	} while (i < len);
 
 	wg->ShowAddUrlListDialog();
-	wg->Release();
-	delete[] urls;
 	return true;
 }
 
 bool PassRequestToFdm(const std::string pszUrl, const std::string pszOrigUrl, const std::string pszCookies,
 		const std::string pszReferrer, bool list, bool page, std::string post, std::string useragent)
 {
+	LOG("PassRequestToFdm");
+
 	if(pszUrl.length() == 0)
 		return false;
 
@@ -372,6 +386,8 @@ bool PassRequestToFdm(const std::string pszUrl, const std::string pszOrigUrl, co
 
 void ReplyToExtension(const std::string id, const std::string msg)
 {
+	LOG("ReplyToExtension");
+
 	const char* format = "{\"id\": %s, \"result\": %s}";
 	size_t len = strlen(format)+id.length()+msg.length()+1;
 	char* message = new char[len];
@@ -404,6 +420,8 @@ _bContextMenuDLAll, _bContextMenuDLFlashVideo, _bContextMenuDLPage, _bContextMen
 bool ParseRequest(std::string& id, std::string& url, std::string& origUrl,
 	std::string& cookies, std::string& referrer, bool& list, bool& page, std::string& post, std::string& useragent)
 {
+	LOG("ParseRequest");
+
 	
 	size_t length = 0;
 	for (int i = 0; i < 4; i++)
@@ -415,20 +433,19 @@ bool ParseRequest(std::string& id, std::string& url, std::string& origUrl,
 	}
 
 	
-	char* msg = new char[length+1];
-	memset(msg, 0, length+1);
+	std::string msg;
 	for(size_t i = 0; i < length; i++)
-			msg[i] = getchar();
+		msg.push_back(getchar());
+
+	if (msg.empty())
+		return false;
 	
 	
 	picojson::value v;
 	std::string err;
-	picojson::parse(v, msg, msg + length, &err);
+	picojson::parse(v, &msg.front(), &msg.front() + length, &err);
 	if (!err.empty())
-	{
-		delete[] msg;
 		return false;
-	}
 	
 	id   = v.get( "id").to_str();
 	url  = v.get("url").to_str();
@@ -440,13 +457,31 @@ bool ParseRequest(std::string& id, std::string& url, std::string& origUrl,
 	post = v.get("post").to_str();
 	useragent = v.get("useragent").to_str();
 
-	delete[] msg;
 	return true;
+}
+
+void FindParentBrowser()
+{
+	auto cmdline = GetCommandLine();
+	if (strstr(cmdline, "ahmpjcflkgiildlgicmcieglgoilbfdp")) 
+		g_browser = Chrome;
+	else
+		g_browser = Firefox;
 }
 
 int main()
 {
+#ifdef DO_LOG
+	char szTmp[MAX_PATH];
+	GetTempPath(MAX_PATH, szTmp);
+	strcat(szTmp, "\\fdm_nativehost.exe.log");
+	DeleteFile(szTmp);
+	g_log.open(szTmp, std::ofstream::out);
+#endif
+
 	CoInitialize (NULL);
+
+	FindParentBrowser();
 
 	ReadConfig();
 	PassConfigToExtension();

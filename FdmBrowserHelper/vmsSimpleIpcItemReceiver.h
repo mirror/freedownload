@@ -10,7 +10,8 @@ public:
 	enum 
 	{
 		rcv_uri_encoded = 1,
-		rcv_base64_encoded = 1 << 1,		
+		rcv_base64_encoded = 1 << 1,
+		rcv_data_len_as_string = 1 << 2,
 	};
 
 public:
@@ -35,7 +36,24 @@ public:
 		std::unique_ptr <vmsSimpleIpcItem> result;
 
 		uint32_t size = 0;
-		if (1 == fread (&size, 4, 1, stdin))
+		bool hasSize = false;
+
+		if (m_flags & rcv_data_len_as_string)
+		{
+			std::string str;
+			char ch;
+			while (1 == fread (&ch, 1, 1, stdin) &&
+				ch != ' ')
+				str += ch;
+			size = atoi (str.c_str ());
+			hasSize = size != 0;
+		}
+		else
+		{
+			hasSize = 1 == fread (&size, 4, 1, stdin);
+		}
+
+		if (hasSize)
 		{
 			assert (size);
 

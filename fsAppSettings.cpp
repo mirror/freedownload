@@ -3772,3 +3772,43 @@ BOOL fsAppSettings::ShowUserNotification (LPCTSTR notificationId)
 {
 	return m_stgs.GetProfileInt (L"View\\UserNotification\\Show", notificationId, TRUE);
 }
+
+BOOL fsAppSettings::ShowFdm5Banner()
+{
+	return m_stgs.GetProfileInt(L"Settings\\View", L"ShowFdm5Banner", TRUE);
+}
+
+void fsAppSettings::ShowFdm5Banner(BOOL val)
+{
+	m_stgs.WriteProfileInt(L"Settings\\View", L"ShowFdm5Banner", val);
+}
+
+time_t fsAppSettings::Fdm5BannerLastTime()
+{
+	return (time_t)m_stgs.GetProfileInt(L"Settings\\View", L"Fdm5BannerLastTime", 0);
+}
+
+void fsAppSettings::Fdm5BannerLastTime(time_t val)
+{
+	m_stgs.WriteProfileInt(L"Settings\\View", L"Fdm5BannerLastTime", (int)val);
+}
+
+BOOL fsAppSettings::Fdm5BannerShownEver()
+{
+	return m_stgs.GetProfileInt(L"Settings\\View", L"Fdm5BannerShownEver", FALSE);
+}
+
+void fsAppSettings::Fdm5BannerShownEver(BOOL val)
+{
+	m_stgs.WriteProfileInt(L"Settings\\View", L"Fdm5BannerShownEver", val);
+}
+
+BOOL fsAppSettings::LegacyFfExtensionChecked()
+{
+	return m_stgs.GetProfileInt(L"Settings", L"LegacyFfExtensionChecked", FALSE);
+}
+
+void fsAppSettings::LegacyFfExtensionChecked(BOOL val)
+{
+	m_stgs.WriteProfileInt(L"Settings", L"LegacyFfExtensionChecked", val);
+}

@@ -9,5 +9,8 @@ public:
 	vmsFdmBrowserHelperApp ();
 	~vmsFdmBrowserHelperApp ();
 	int run ();
+
+protected:
+	bool m_buggyBrowser = false;
 };
 

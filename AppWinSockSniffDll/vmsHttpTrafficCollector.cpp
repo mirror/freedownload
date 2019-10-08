@@ -336,7 +336,10 @@ void vmsHttpTrafficCollector::MoveDialogToCompleted(HttpDialog *pDlg)
 
 	assert (pDlg->pHttpResponse != NULL);
 	if (!pDlg->pHttpResponse)
+	{
+		LOGsnl("no http response");
 		return;
+	}
 
 #ifndef DEBUG_SAVE_ALL_HTTP_BODIES
 	

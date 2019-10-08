@@ -66,32 +66,32 @@ void fsInitRAS ()
 		_pfnRasGetStat = (fntRasGetStat) GetProcAddress (hDll, "RasGetConnectionStatistics");
 
 		
-		_pfnRasHangUp  = (fntRasHangUp) GetProcAddress (hDll, "RasHangUpA");
+		_pfnRasHangUp  = (fntRasHangUp) GetProcAddress (hDll, "RasHangUpW");
 		if (_pfnRasHangUp == NULL)
 			_pfnRasHangUp  = (fntRasHangUp) GetProcAddress (hDll, "RasHangUp");
 
 		
-		_pfnRasGetErrorString = (fntRasGetErrorString) GetProcAddress (hDll, "RasGetErrorStringA");
+		_pfnRasGetErrorString = (fntRasGetErrorString) GetProcAddress (hDll, "RasGetErrorStringW");
 		if (_pfnRasGetErrorString == NULL)
 			_pfnRasGetErrorString = (fntRasGetErrorString) GetProcAddress (hDll, "RasGetErrorString");
 
 		
-		_pfnRasDial = (fntRasDial) GetProcAddress (hDll, "RasDialA");
+		_pfnRasDial = (fntRasDial) GetProcAddress (hDll, "RasDialW");
 		if (_pfnRasDial == NULL)
 			_pfnRasDial = (fntRasDial) GetProcAddress (hDll, "RasDial");
 
 		
-		_pfnRasGetEntryDialParams = (fntRasGetEntryDialParams) GetProcAddress (hDll, "RasGetEntryDialParamsA");
+		_pfnRasGetEntryDialParams = (fntRasGetEntryDialParams) GetProcAddress (hDll, "RasGetEntryDialParamsW");
 		if (_pfnRasGetEntryDialParams == NULL)
 			_pfnRasGetEntryDialParams = (fntRasGetEntryDialParams) GetProcAddress (hDll, "RasGetEntryDialParams");
 
 		
-		_pfnRasEnumEntries = (fntRasEnumEntries) GetProcAddress (hDll, "RasEnumEntriesA");
+		_pfnRasEnumEntries = (fntRasEnumEntries) GetProcAddress (hDll, "RasEnumEntriesW");
 		if (_pfnRasEnumEntries == NULL)
 			_pfnRasEnumEntries = (fntRasEnumEntries) GetProcAddress (hDll, "RasEnumEntries");
 
 		
-		_pfnRasEnumConnections = (fntRasEnumConnections) GetProcAddress (hDll, "RasEnumConnectionsA");
+		_pfnRasEnumConnections = (fntRasEnumConnections) GetProcAddress (hDll, "RasEnumConnectionsW");
 		if (_pfnRasEnumConnections == NULL)
 			_pfnRasEnumConnections = (fntRasEnumConnections) GetProcAddress (hDll, "RasEnumConnections");
 
@@ -116,7 +116,7 @@ void fsSysGetConnectionStatistics (HRASCONN hRasConn, RAS_STATS* pStatistics)
 		if (_pfnRasGetStat == NULL)
 			return;
 	}
-
+    
 	_pfnRasGetStat (hRasConn, pStatistics);
 }
 
@@ -521,9 +521,9 @@ LONG fsCopyKey(HKEY hSrcParent, HKEY hTargParent, LPCTSTR szSrcKey, LPCTSTR szTa
 
         if(hTargKey != NULL)
             RegCloseKey(hTargKey);
-
-        return nRes;
     }
+
+    return nRes;
 }
 
 DWORD vmsSHCopyKey (HKEY hkeySrc, LPCTSTR pszSubKey, HKEY hkeyDst)
@@ -575,9 +575,9 @@ BOOL vmsDeleteFileAtWinBoot (LPCTSTR pszFile)
 	return vmsMoveFileAtWinBoot (pszFile, NULL);
 }
 
-char vmsGetExeDriveLetter ()
+TCHAR vmsGetExeDriveLetter ()
 {
-	static char _chResult = 0;
+	static TCHAR _chResult = 0;
 	if (_chResult)
 		return _chResult;
 	TCHAR sz [MAX_PATH] = _T("");

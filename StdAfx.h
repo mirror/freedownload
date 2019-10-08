@@ -85,6 +85,8 @@ extern CFdmModule _Module;
 #include <atlcom.h>
 #include <atlsecurity.h>
 
+#include <GdiPlus.h>
+
 #ifndef LONG_PTR
 #define LONG_PTR		LONG
 #define DWORD_PTR		DWORD
@@ -108,12 +110,20 @@ extern CFdmModule _Module;
 #include <future>
 #include <unordered_map>
 
+#include "Include.Add/picojson.h"
+#define JsonSerializationInputStreamClass vmsJson2SerializationInputStream
+#define JsonSerializationOutputStreamClass vmsJson2SerializationOutputStream
+
 #include "common/vms_sifdm_cl/base.h"
 #include "common/vms_sifdm_cl/archive/vmsZip.h"
 #include "common/vms_sifdm_cl/archive/vmsUnzip.h"
 #include "common/vms_sifdm_cl/inet/wininet/vmsPostRequest.h"
 #include "common/vms_sifdm_cl/win/defs.h"
 #include "common/vms_sifdm_cl/threadsafe/vmsThreadSafe4.h"
+#include "common/vms_sifdm_cl/serialization/vmsSerializable.h"
+#include "common/vms_sifdm_cl/json/vmsJson2SerializationStream.h"
+#include "common/vms_sifdm_cl/json/util.h"
+#include "common/vms_sifdm_cl/serialization/vmsSerializableObjVector.h"
 
 #define delta(a,b) (((a) > (b)) ? ((a)-(b)) : ((b)-(a)))
 

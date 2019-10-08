@@ -15,11 +15,17 @@ class vmsFirefoxMonitoring
 {
 public:
 	
-	static bool Install (bool bInstall);
-	
-	static bool IsFlashGotInstalled();
+	static bool Install(bool bInstall);
 	
 	static bool IsInstalled();
+	
+	static bool Install_OLDWAY2(bool bInstall);
+	
+	static bool IsInstalled_OLDWAY2();
+	
+	static bool Install_OLDWAY (bool bInstall);
+	
+	static bool IsInstalled_OLDWAY();
 	
 	
 	static bool IsEnabledInFirefox(bool &bEnabled);
@@ -33,6 +39,8 @@ public:
 protected:
 	static bool CheckEnabled(vmsFirefoxExtensionInfo& info,
 		LPCTSTR profile, LPCTSTR file, bool& bEnabled);
+	static bool CheckEnabled(vmsFirefoxExtensionInfo& info,
+		LPCTSTR profile, LPCTSTR file, LPCTSTR extensionID, bool& bEnabled);
 };
 
 #endif 

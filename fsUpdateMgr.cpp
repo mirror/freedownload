@@ -9,6 +9,8 @@
 #include "mfchelp.h"
 #include "vmsSecurity.h"
 #include "vmsAppMutex.h"
+#include "vmsAppGenericInfoManager.h"
+#include "common/vms_sifdm_cl/inet/uri/UriCodec.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -87,16 +89,27 @@ void fsUpdateMgr::CheckForUpdate(bool bByUser)
 
 	strUrl += _T("proupd3.lst");
 
+	std::unordered_map<std::string, std::string> urlParams;
+
 	if (!_App.Update_CheckedOnce ())
-		strUrl += _T ("?initial");
+		urlParams["initial"] = "1";
 
 	std::wstring Customizer = pFrm->get_Customizations ()->get_Customizer () ? 
 		wideFromUtf8 (pFrm->get_Customizations ()->get_Customizer ()) : 
 		L"";
 	if (!Customizer.empty ())
+		urlParams["edition"] = UriEncode(utf8FromWide(Customizer));
+
+	appendStats(urlParams);
+
+	bool firstParam = true;
+	for (auto &&item : urlParams)
 	{
-		strUrl += _T("?edition=");
-		strUrl += Customizer.c_str ();
+		strUrl += firstParam ? "?" : "&";
+		strUrl += std::wstring(item.first.begin(), item.first.end()).c_str();
+		strUrl += "=";
+		strUrl += std::wstring(item.second.begin(), item.second.end()).c_str();
+		firstParam = false;
 	}
 
 	m_dldr->CreateByUrl (strUrl);
@@ -496,4 +509,44 @@ void fsUpdateMgr::FixIniFileFor9x(LPCTSTR pszIni)
 	SetEndOfFile (hFile);
 
 	CloseHandle (hFile);
+}
+
+std::string getUserLocale()
+{
+	WCHAR loc [100] = L"";
+	typedef int (WINAPI *FNGetUserDefaultLocaleName)(LPWSTR, int);
+	auto pfn = (FNGetUserDefaultLocaleName)GetProcAddress (
+		GetModuleHandle (L"kernel32"),
+		"GetUserDefaultLocaleName");
+	if (pfn)
+	{
+		pfn (loc, _countof (loc));
+	}
+	else
+	{
+		LCID lc = GetUserDefaultLCID();
+		GetLocaleInfo(lc, LOCALE_SENGLANGUAGE,
+			loc, _countof(loc));
+	}
+	return utf8FromWide (loc);
+}
+
+void fsUpdateMgr::appendStats(
+	std::unordered_map<std::string, std::string> &query)
+{
+	vmsAppGenericInfoManager appinfo;
+	vmsWinOsVersion osver;
+	query["os"] = "windows";
+	std::stringstream ssver;
+	ssver << osver.major_version() << "." << osver.minor_version() << "." << osver.build_number();
+	query["osversion"] = UriEncode(ssver.str());
+	query["architecture"] = "x86";
+	query["version"] = UriEncode(utf8FromWide(vmsFdmAppMgr::getVersion ()->m_fileVersion.ToString()));
+	query["uuid"] = UriEncode(utf8FromWide(appinfo.info().m_appGuid));
+	query["initiator"] = m_bCheckingByUser ? "2" : "1";
+	query["locale"] = UriEncode(getUserLocale());
+	char sz[100] = "";
+	query["ca"] = itoa(_DldsMgr.GetCount(), sz, 10);
+	query["cd"] = itoa(_DldsMgr.GetCount24h(), sz, 10);
+	query["k"] = "";
 }

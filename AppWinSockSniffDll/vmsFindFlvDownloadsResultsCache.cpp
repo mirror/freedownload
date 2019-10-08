@@ -33,6 +33,15 @@ HRESULT vmsFindFlvDownloadsResultsCache::FindFlvDownloads(LPCSTR pszUrl, LPCSTR 
 	if (!pszFlashVars)
 		pszFlashVars = "";
 
+	if (!strnicmp(pszSwfUrl, "blob:", 5))
+	{
+		LOGsnl("Target flash has BLOB url. Ignore SWF and flashvars info.");
+		pszSwfUrl = "";
+		pszFlashVars = "";
+		pszOtherSwfUrls = "";
+		pszOtherFlashVars = "";
+	}
+
 #ifdef LOG_WEBFILES_TREE
 	extern LONG _cInOnGetItBtnClicked;
 	static DWORD _dwLastTicks = 0;

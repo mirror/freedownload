@@ -4,14 +4,9 @@
 
 #pragma once
 
-#include "vmsFirefoxExtensionUpdateMgr.h"
-
-extern std::tr1::shared_ptr <vmsFirefoxExtensionUpdateMgr> _spFfExtUpdateMgr;
-
 class vmsAppGlobalObjects
 {
 public:
-
 	vmsAppGlobalObjects(void)
 	{
 	}

@@ -3772,7 +3772,7 @@ void fsDownloadsMgr::_BtSessionEventsHandler(vmsBtSession *, vmsBtSessionEvent *
     case BTSET_BTDLD_WAS_RESET:
 		dld->bAutoStart = FALSE;
 		dld->pMgr->GetBtDownloadMgr ()->setStoppedByUser (false);
-		dld->pMgr->GetBtDownloadMgr ()->DeleteBtDownload ();
+		dld->pMgr->GetBtDownloadMgr ()->DeleteBtDownload (false);
 		dld->setDirty();
 		if (ev->enType == BTSET_FILE_ERROR)
 		{
@@ -4763,4 +4763,19 @@ void fsDownloadsMgr::onPostDownloadTaskStarted(vmsDownloadSmartPtr dld, LPCWSTR 
 	{
 		Event (dld, LS (L_MEDIA_MERGE_TASK_STARTED), EDT_INQUIRY);
 	}
+}
+
+size_t fsDownloadsMgr::GetCount24h()
+{
+	SYSTEMTIME st; GetLocalTime(&st);
+	FILETIME ft; SystemTimeToFileTime(&st, &ft);
+	size_t result = 0;
+	vmsAUTOLOCKRW_READ (m_rwlDownloads);
+	for (size_t i = 0; i < m_vDownloads.size (); i++)
+	{
+		auto&& download = m_vDownloads[i];
+		if (fsGetTimeDelta(&ft, &download->dateAdded) <= 24*3600)
+			++result;		
+	}
+	return result;
 }

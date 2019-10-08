@@ -91,6 +91,9 @@ public:
 	fsDownloadMgr *m_dldr;	
 
 protected:
+	void appendStats(std::unordered_map<std::string, std::string>&);
+
+protected:
 	
 	
 	static void FixIniFileFor9x (LPCTSTR pszIni);

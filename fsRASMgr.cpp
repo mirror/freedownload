@@ -30,7 +30,8 @@ BOOL fsRASMgr::EnumEntries()
 	ULONG cb = sizeof(RASENTRYNAME);
 	ULONG cEntries;
 
-	pREN->dwSize = sizeof(RASENTRYNAME);
+	ZeroMemory(pREN, sizeof(RASENTRYNAME));
+    pREN->dwSize = sizeof(RASENTRYNAME);
 
 	nRet = fsRasEnumEntries (NULL, NULL, pREN, &cb, &cEntries);
 	
@@ -42,6 +43,7 @@ BOOL fsRASMgr::EnumEntries()
 		{
 			BYTE *pb;
 			fsnew (pb, BYTE, cb);
+            ZeroMemory(pb, cb);
 			pREN = (LPRASENTRYNAME) pb; 
 			pREN->dwSize = sizeof(RASENTRYNAME);
 

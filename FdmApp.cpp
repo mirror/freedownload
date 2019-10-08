@@ -56,6 +56,8 @@ extern CSpiderWnd *_pwndSpider;
 #include "vmsAVMergingMgr.h"
 #include "vmsAVMergerFFMPEG.h"
 #include "vmsYouTubeAfterMergeAction.h"
+#include "vmsAppGenericInfoManager.h"
+#include "../common/vms_sifdm_cl/win/gdiplus/vmsGdiPlusStartup.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -121,6 +123,8 @@ BOOL CFdmApp::InitInstance()
 	CheckRegistry ();
 
 	fsIECatchMgr::CleanIEPluginKey ();
+
+	WriteProfileInt(L"", L"SupportsBuggyBrowser", 1);
 
 	
 	CString strPath = GetProfileString (_T(""), _T("Path"), _T(""));
@@ -188,6 +192,8 @@ BOOL CFdmApp::InitInstance()
 		pStgs->LoadSettingsFromFile (strStgsFile);
 		_App.ApplySettingsToMutexes ();
 	}
+
+	{vmsAppGenericInfoManager agim; UNUSED(agim);} 
 
 	BOOL bNoLng = FALSE;
 
@@ -353,6 +359,8 @@ BOOL CFdmApp::InitInstance()
 	auto avAfterMergeAction = std::make_shared<vmsYouTubeAfterMergeAction>();
 	auto avYouTubeMergingMgr = std::make_shared <vmsAVMergingMgr>( avMerger, avAfterMergeAction, 1 );	
 	_YouTubeDldsMgr.setYouTubeAVMergingMgr( avYouTubeMergingMgr );
+
+	new vmsGdiPlusStartup;
 
 	CMainFrame* pFrame = NULL;
 	fsnew1 (pFrame, CMainFrame);
@@ -902,13 +910,17 @@ BOOL CFdmApp::RegisterServer(BOOL bGlobal, bool bRegisterForUserOnly )
 	BOOL bIeOK = _IECatchMgr.InstallIeIntegration (
 		(dwMUSO & MONITOR_USERSWITCHEDON_IE) != 0, bRegisterForUserOnly);
 
-	vmsFirefoxMonitoring::Install (true);
-	if (vmsFirefoxMonitoring::IsInstalled () == false)
+	
+	if (vmsFirefoxMonitoring::IsInstalled_OLDWAY ())
+	{
+		vmsFirefoxMonitoring::Install_OLDWAY (false);
 		_App.Monitor_Firefox (FALSE);
-	else
-		_App.Monitor_Firefox ((dwMUSO & MONITOR_USERSWITCHEDON_FIREFOX) != 0);
-	
-	
+	}
+	if (vmsFirefoxMonitoring::IsInstalled_OLDWAY2())
+	{
+		vmsFirefoxMonitoring::Install_OLDWAY2(false);
+		_App.Monitor_Firefox(FALSE);
+	}
 
 	if (bRegisterForUserOnly)
 		vmsNotEverywhereSupportedFunctions::ResetHKCR();

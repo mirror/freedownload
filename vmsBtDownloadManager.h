@@ -151,7 +151,7 @@ public:
 	BOOL CreateByTorrentFile (LPCTSTR pszTorrentFile, LPCTSTR pszOutputPath, LPCTSTR pszTorrentUrl, BOOL bSeedOnly = FALSE);
 	BOOL CreateByMagnetLink (LPCTSTR pszMagnetLink, LPCTSTR pszOutputPath);
 	BOOL CreateByMagnetMetadata (vmsBtFile* vmsfile, LPCTSTR pszOutputPath);
-	void DeleteBtDownload();
+	void DeleteBtDownload(bool deleteSessionOnZeroDownloads = true);
 	
 	BOOL DownloadMagnetMetadata(LPCTSTR pszMagnetLink = _T(""), LPCTSTR pszOutputPath = _T(""));
 	BOOL checkMagnetMetadata();

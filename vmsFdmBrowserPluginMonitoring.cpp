@@ -17,6 +17,7 @@ vmsFdmBrowserPluginMonitoring::~vmsFdmBrowserPluginMonitoring(){
 
 bool vmsFdmBrowserPluginMonitoring::MonitorFF( BOOL bMonitor, BOOL &bNeedRestartBrowser ){
 	BOOL bFF = bMonitor;
+	bNeedRestartBrowser = FALSE;
 	if (bFF && vmsFirefoxMonitoring::IsInstalled () == false)
 	{
 		if (vmsFirefoxMonitoring::Install (true) == false)
@@ -24,11 +25,6 @@ bool vmsFdmBrowserPluginMonitoring::MonitorFF( BOOL bMonitor, BOOL &bNeedRestart
 			MessageBox (NULL, LS (L_CANTINITFFMONITOR), LS (L_ERR), MB_ICONERROR);			
 			bFF = FALSE;
 		}
-	}
-	if (bFF && vmsFirefoxMonitoring::IsFlashGotInstalled ())
-	{
-		MessageBox (NULL, LS (L_FLASHGOTDETECTED), vmsFdmAppMgr::getAppName (), MB_ICONWARNING);		
-		bFF = FALSE;
 	}
 	if (bFF)
 	{
@@ -49,8 +45,6 @@ bool vmsFdmBrowserPluginMonitoring::MonitorFF( BOOL bMonitor, BOOL &bNeedRestart
 	}
 	
 	_App.Monitor_Firefox (bFF);
-	if (bFF)
-		vmsFirefoxMonitoring::Install (true); 
 
 	return bFF;
 }
@@ -68,7 +62,7 @@ bool vmsFdmBrowserPluginMonitoring::MonitorChrome(bool* value, bool *needRestart
 	}
 	else 
 	{
-
+		BOOL wasEnabled = _App.Monitor_Chrome();
 		_App.Monitor_Chrome (*value);
 
 		bool bOk = false;
@@ -112,7 +106,7 @@ bool vmsFdmBrowserPluginMonitoring::MonitorChrome(bool* value, bool *needRestart
 		}
 		else
 		{
-			if (needRestartBrowser)
+			if (wasEnabled && needRestartBrowser)
 				*needRestartBrowser = true;
 		}
 
@@ -154,8 +148,7 @@ void vmsFdmBrowserPluginMonitoring::SuggestBrowserExtensions()
 	if (bFFInstalled && bOldFFInstalled != bFFInstalled)
 		_App.Monitor_FirefoxInstalled( bFFInstalled );
 
-	bool bMonitoringFF = _App.Monitor_Firefox() && vmsFirefoxMonitoring::IsInstalled () &&
-		( vmsFirefoxMonitoring::IsFlashGotInstalled () == false );
+	bool bMonitoringFF = _App.Monitor_Firefox() && vmsFirefoxMonitoring::IsInstalled ();
 	if (!bOldFFInstalled && !_App.Monitor_FirefoxExtensionSuggested() && bFFInstalled && !bMonitoringFF )
 	{
 		_App.Monitor_FirefoxExtensionSuggested(TRUE);

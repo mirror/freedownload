@@ -2511,7 +2511,7 @@ BEGIN
     LTEXT           "Copyright (c)",IDC_STATIC,36,31,40,9
     LTEXT           "Version",IDC__VER,36,18,160,9
     LTEXT           "FreeDownloadManager.ORG",IDC__FIRM,78,31,92,9,SS_NOTIFY
-    LTEXT           ", 2003-2015",IDC_STATIC,173,31,40,8
+    LTEXT           ", 2003-2018",IDC_STATIC,173,31,40,8
     LTEXT           "-",IDC__WARN,7,80,266,31
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,6,73,266,1
     LTEXT           "Click here to contact us",IDC__SUPPORT,36,45,239,8,SS_NOTIFY
@@ -3574,8 +3574,8 @@ IDC_HAND_               CURSOR                  "res\\hand.cur"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,9,1627,0
- PRODUCTVERSION 3,9,1627,0
+ FILEVERSION 3,9,1641,0
+ PRODUCTVERSION 3,9,1641,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -3592,8 +3592,8 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "FreeDownloadManager.ORG"
             VALUE "FileDescription", "Free Download Manager"
-            VALUE "FileVersion", "3.9.1627.0"
-            VALUE "LegalCopyright", "Copyright © 2003-2015"
+            VALUE "FileVersion", "3.9.1641.0"
+            VALUE "LegalCopyright", "Copyright © 2003-2018"
             VALUE "ProductName", "Free Download Manager"
             VALUE "ProductVersion", "3.9.7 "
         END

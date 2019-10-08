@@ -189,7 +189,7 @@ void vmsWinSockHttpTrafficCollector::OnDataRcvd(SOCKET s, const char *pData, int
 
 	case vmsHttpTrafficCollector::HttpDialog::RECEIVING_RESPONSE_HEADERS:
 	{
-		assert (spDlg->strResponseHeaders.empty () == false || strncmp (pData, "HTTP/", 5) == 0);
+		
 		LPCSTR pszHdrEnd = strstrn (pData, "\r\n\r\n", nLen);
 		if (pszHdrEnd == NULL)
 			spDlg->strResponseHeaders.append (pData, nLen);

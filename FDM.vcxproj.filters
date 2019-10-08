@@ -1218,6 +1218,15 @@
     <ClCompile Include="vmsDownloaderSecCheckFailureHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vmsAppGenericInfoManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Fdm5BannerWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Fdm5BannerManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Fdm.idl">
@@ -2509,6 +2518,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vmsDownloaderSecCheckFailureHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vmsAppGenericInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vmsAppGenericInfoManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Fdm5BannerWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Fdm5BannerManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

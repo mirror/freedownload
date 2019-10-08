@@ -11,9 +11,10 @@
 #include "vmsFirefoxExtensionInfo.h"
 #include "vmsTmpFileName.h"
 #include "vmsRegisteredApp.h"
+#include "common/vms_sifdm_cl/win/apps/util.h"
 
-#define FLASHGOT_CID	_T("{19503e42-ca3c-4c27-b1e2-9cdb2170ee34}")
-#define FDM_CID			_T("fdm_ffext@freedownloadmanager.org")
+#define FDM_NEW_CID			_T("fdm_ffext2@freedownloadmanager.org")
+#define FDM_LEGACY_CID		_T("fdm_ffext@freedownloadmanager.org")
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -33,35 +34,85 @@ vmsFirefoxMonitoring::~vmsFirefoxMonitoring()
 
 bool vmsFirefoxMonitoring::IsInstalled()
 {
-	return vmsFirefoxExtensionInstaller::IsInstalledUsingRegistry(FDM_CID) ||
-		vmsFirefoxExtensionInstaller::IsInstalledInProfile (FDM_CID, true, (LPCTSTR)_App.Firefox_PortableVersionPath ());
-}
-
-bool vmsFirefoxMonitoring::IsFlashGotInstalled()
-{
-	return vmsFirefoxExtensionInstaller::IsInstalledUsingRegistry (FLASHGOT_CID) ||
-		vmsFirefoxExtensionInstaller::IsInstalledInProfile (FLASHGOT_CID, true, (LPCTSTR)_App.Firefox_PortableVersionPath ());
+	return vmsFirefoxExtensionInstaller::IsInstalledInProfile(
+		FDM_NEW_CID,
+		true,
+		(LPCTSTR)_App.Firefox_PortableVersionPath());
 }
 
 bool vmsFirefoxMonitoring::Install(bool bInstall)
 {
-	assert (_spFfExtUpdateMgr != NULL);
-	CString strPath;
-	if (!_spFfExtUpdateMgr)
+	if (bInstall)
 	{
-		strPath = ((CFdmApp*)AfxGetApp ())->m_strAppPath;
-		strPath += "Firefox\\Extension";
+		auto ee = vmsGetAppAbsolutePath(L"firefox.exe");
+		if (ee.empty() ||
+			GetFileAttributes(ee.c_str()) == DWORD(-1))
+		{
+			ee = L"firefox.exe";
+		}
+		vmsCommandLine cl;
+		cl.setExe(ee.c_str());
+		cl.setArgs(_T("https://addons.mozilla.org/en-US/firefox/addon/free-download-manager-addon/"));
+		return cl.Execute();
 	}
 	else
 	{
-		strPath = _spFfExtUpdateMgr->getExtensionPath ();
+		return vmsFirefoxExtensionInstaller::RemoveXpiInstalledInProfile(
+			FDM_NEW_CID,
+			true,
+			(LPCTSTR)_App.Firefox_PortableVersionPath());
 	}
-	
+}
+
+bool vmsFirefoxMonitoring::IsInstalled_OLDWAY2()
+{
+	return vmsFirefoxExtensionInstaller::IsInstalledInProfile(
+		FDM_LEGACY_CID, 
+		true, 
+		(LPCTSTR)_App.Firefox_PortableVersionPath ());
+}
+
+bool vmsFirefoxMonitoring::Install_OLDWAY2(bool bInstall)
+{
+	if (bInstall)
+	{
+		CString strPath = ((CFdmApp*)AfxGetApp())->m_strAppPath;
+		strPath += "Firefox\\extension.xpi";
+		auto ee = vmsGetAppAbsolutePath(L"firefox.exe");
+		if (ee.empty() ||
+			GetFileAttributes(ee.c_str()) == DWORD(-1))
+		{
+			ee = L"firefox.exe";
+		}
+		vmsCommandLine cl;
+		cl.setExe(ee.c_str());
+		cl.setArgs(CString("\"") + strPath + "\"");
+		return cl.Execute();
+	}
+	else
+	{
+		return vmsFirefoxExtensionInstaller::RemoveXpiInstalledInProfile(
+			FDM_LEGACY_CID,
+			true,
+			(LPCTSTR)_App.Firefox_PortableVersionPath());
+	}
+}
+
+bool vmsFirefoxMonitoring::IsInstalled_OLDWAY()
+{
+	return vmsFirefoxExtensionInstaller::IsInstalledUsingRegistry(FDM_LEGACY_CID) ||
+		vmsFirefoxExtensionInstaller::IsInstalledInProfile (FDM_LEGACY_CID, true, (LPCTSTR)_App.Firefox_PortableVersionPath (), false);
+}
+
+bool vmsFirefoxMonitoring::Install_OLDWAY(bool bInstall)
+{
+	CString strPath = ((CFdmApp*)AfxGetApp ())->m_strAppPath;
+	strPath += "Firefox\\Extension";
 	if ( bInstall )
-		return vmsFirefoxExtensionInstaller::DoUsingRegistry (FDM_CID, strPath, bInstall);
+		return vmsFirefoxExtensionInstaller::DoUsingRegistry (FDM_LEGACY_CID, strPath, bInstall);
 	else{
-		bool bResult1 = vmsFirefoxExtensionInstaller::DoUsingRegistry (FDM_CID, strPath, bInstall) ;
-		bool bResult2 = vmsFirefoxExtensionInstaller::Do (FDM_CID, strPath, 
+		bool bResult1 = vmsFirefoxExtensionInstaller::DoUsingRegistry (FDM_LEGACY_CID, strPath, bInstall) ;
+		bool bResult2 = vmsFirefoxExtensionInstaller::Do (FDM_LEGACY_CID, strPath, 
 			(LPCTSTR)_App.Firefox_PortableVersionPath (), bInstall) ;
 		return bResult1 && bResult2;
 	}
@@ -89,17 +140,29 @@ bool vmsFirefoxMonitoring::IsEnabledInFirefox(bool &bEnabled)
 bool vmsFirefoxMonitoring::CheckEnabled(vmsFirefoxExtensionInfo& fei,
 		LPCTSTR profile, LPCTSTR file, bool& bEnabled)
 {
+	BOOL enabled1 = FALSE, enabled2 = FALSE;
+	bool result = CheckEnabled(fei, profile, file, FDM_NEW_CID, bEnabled);
+	if (result && bEnabled)
+		return true;
+	if (CheckEnabled(fei, profile, file, FDM_LEGACY_CID, bEnabled))
+		result = true;
+	return result;
+}
+
+bool vmsFirefoxMonitoring::CheckEnabled(vmsFirefoxExtensionInfo& fei,
+	LPCTSTR profile, LPCTSTR file, LPCTSTR extensionID, bool& bEnabled)
+{
 	bEnabled = false;
-	TCHAR tszPath[MAX_PATH];
+	TCHAR tszPath [MAX_PATH];
 	_tcsncpy(tszPath, profile, MAX_PATH);
 	_tcsncat(tszPath, file, MAX_PATH);
 
-	if (!fei.Read (tszPath, FDM_CID))
+	if (!fei.Read(tszPath, extensionID))
 	{
 		vmsTmpFileName tmpFile;
-		if (!CopyFile (tszPath, tmpFile, FALSE))
+		if (!CopyFile(tszPath, tmpFile, FALSE))
 			return false;
-		if (!fei.Read (tmpFile, FDM_CID))
+		if (!fei.Read(tmpFile, extensionID))
 			return false;
 	}
 

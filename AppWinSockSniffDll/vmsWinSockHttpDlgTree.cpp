@@ -44,10 +44,14 @@ vmsWinSockHttpDlgTree& vmsWinSockHttpDlgTree::o()
 void vmsWinSockHttpDlgTree::InsertDialog(SPHTTPDLG spDlg)
 {
 	LOGFN ("vmsWinSockHttpDlgTree::InsertDialog");
+	LOG("URL: %s", spDlg->strRequestUrl.c_str());
 
 	assert (spDlg->pHttpResponse != NULL);
 	if (spDlg->pHttpResponse && spDlg->pHttpResponse->getStatusCode () / 100 != 2)
+	{
+		LOG("ignored due to status code: %d", spDlg->pHttpResponse->getStatusCode ());
 		return; 
+	}
 	
 
 	if (spDlg->spUrlMonRequest)
@@ -498,6 +502,8 @@ void vmsWinSockHttpDlgTree::LockRemoveOldDialogs(bool bLock)
 
 void vmsWinSockHttpDlgTree::InsertDialog_Async(SPHTTPDLG spDlg)
 {
+	LOGFN("vmsWinSockHttpDlgTree::InsertDialog_Async");
+
 	EnterCriticalSection (m_csModifyAddDialogsList);
 	
 	m_vAddDialogsList.push_back (spDlg);

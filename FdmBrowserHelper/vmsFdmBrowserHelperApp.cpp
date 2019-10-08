@@ -13,6 +13,8 @@
 
 vmsFdmBrowserHelperApp::vmsFdmBrowserHelperApp ()
 {
+	m_buggyBrowser = nullptr != 
+		strstri(GetCommandLine(), L"--buggybrowser");
 }
 
 vmsFdmBrowserHelperApp::~vmsFdmBrowserHelperApp ()
@@ -34,6 +36,13 @@ int vmsFdmBrowserHelperApp::run ()
 	auto browserActivityMonitor = std::make_shared <vmsBrowserActivityMonitor> ();
 
 	vmsSimpleIpcTaskManager <vmsFdmBhIpcTask> ipcmgr;
+
+	if (m_buggyBrowser)
+	{
+		ipcmgr.get_receiver()->set_flags(
+			vmsSimpleIpcItemReceiver::rcv_data_len_as_string);
+	}
+
 	vmsFdmBhIpcTaskProcessorManager task_processor (
 		ipcmgr.get_sender (),
 		ipcmgr.get_receiver (),

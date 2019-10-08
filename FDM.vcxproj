@@ -124,7 +124,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>Lib.add;$(BOOST_ROOT)\stage\lib;$(BOOST_ROOT)\lib32-msvc-10.0;%(AdditionalLibraryDirectories);$(BOOST_ROOT)\lib32-msvc-12.0</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PartMediaPreview/Release/PartMediaPreview.lib;FDMCustomized/FDMCustomized_lib/Release/FDMCustomized_lib.lib;InetFile/Release/inetfile.lib;Mswsock.lib;Hash\Release\hash.lib;inetfile/curl_lib/release/curl_lib.lib;dxguid.lib;wininet.lib;rasapi32.lib;Ws2_32.lib;htmlhelp.lib;winmm.lib;strmiids.lib;Version.lib;Iphlpapi.lib;libeay32-md.lib;ssleay32-md.lib;Msimg32.lib;%(AdditionalDependencies);zlib\$(Configuration)\zlib.lib;dbghelp.lib</AdditionalDependencies>
+      <AdditionalDependencies>PartMediaPreview/Release/PartMediaPreview.lib;FDMCustomized/FDMCustomized_lib/Release/FDMCustomized_lib.lib;InetFile/Release/inetfile.lib;Mswsock.lib;Hash\Release\hash.lib;inetfile/curl_lib/release/curl_lib.lib;dxguid.lib;wininet.lib;rasapi32.lib;Ws2_32.lib;htmlhelp.lib;winmm.lib;strmiids.lib;Version.lib;Iphlpapi.lib;libeay32-md.lib;ssleay32-md.lib;Msimg32.lib;%(AdditionalDependencies);zlib\$(Configuration)\zlib.lib;dbghelp.lib;Gdiplus.lib</AdditionalDependencies>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/MAPINFO:EXPORTS </AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>
@@ -174,7 +174,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>Lib.add;%(AdditionalLibraryDirectories);$(BOOST_ROOT)\lib32-msvc-12.0</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PartMediaPreview/$(Configuration)/PartMediaPreview.lib;FDMCustomized/FDMCustomized_lib/$(Configuration)/FDMCustomized_lib.lib;InetFile/$(Configuration)/inetfile.lib;alsfolderbrowser.lib;Mswsock.lib;Hash\$(Configuration)\hash.lib;inetfile/curl_lib/$(Configuration)/curl_lib.lib;dxguid.lib;wininet.lib;rasapi32.lib;Ws2_32.lib;htmlhelp.lib;winmm.lib;strmiids.lib;Version.lib;Iphlpapi.lib;libeay32.lib;ssleay32.lib;Msimg32.lib;%(AdditionalDependencies);zlib.lib;dbghelp.lib</AdditionalDependencies>
+      <AdditionalDependencies>PartMediaPreview/$(Configuration)/PartMediaPreview.lib;FDMCustomized/FDMCustomized_lib/$(Configuration)/FDMCustomized_lib.lib;InetFile/$(Configuration)/inetfile.lib;alsfolderbrowser.lib;Mswsock.lib;Hash\$(Configuration)\hash.lib;inetfile/curl_lib/$(Configuration)/curl_lib.lib;dxguid.lib;wininet.lib;rasapi32.lib;Ws2_32.lib;htmlhelp.lib;winmm.lib;strmiids.lib;Version.lib;Iphlpapi.lib;libeay32.lib;ssleay32.lib;Msimg32.lib;%(AdditionalDependencies);zlib.lib;dbghelp.lib;Gdiplus.lib</AdditionalDependencies>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/MAPINFO:EXPORTS </AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>
@@ -225,7 +225,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>Lib.add;$(BOOST_ROOT)\stage\lib;$(BOOST_ROOT)\lib32-msvc-10.0;%(AdditionalLibraryDirectories);$(BOOST_ROOT)\lib32-msvc-12.0</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PartMediaPreview\Debug\PartMediaPreview.lib;FDMCustomized/FDMCustomized_lib/Debug/FDMCustomized_lib.lib;InetFile\Debug\inetfile.lib;Hash\Debug\hash.lib;InetFile\curl_lib\debug\curl_lib.lib;dxguid.lib;wininet.lib;rasapi32.lib;Ws2_32.lib;htmlhelp.lib;winmm.lib;strmiids.lib;Version.lib;Iphlpapi.lib;libeay32d.lib;ssleay32d.lib;Msimg32.lib;%(AdditionalDependencies);zlib\$(Configuration)\zlib.lib;dbghelp.lib</AdditionalDependencies>
+      <AdditionalDependencies>PartMediaPreview\Debug\PartMediaPreview.lib;FDMCustomized/FDMCustomized_lib/Debug/FDMCustomized_lib.lib;InetFile\Debug\inetfile.lib;Hash\Debug\hash.lib;InetFile\curl_lib\debug\curl_lib.lib;dxguid.lib;wininet.lib;rasapi32.lib;Ws2_32.lib;htmlhelp.lib;winmm.lib;strmiids.lib;Version.lib;Iphlpapi.lib;libeay32d.lib;ssleay32d.lib;Msimg32.lib;%(AdditionalDependencies);zlib\$(Configuration)\zlib.lib;dbghelp.lib;Gdiplus.lib</AdditionalDependencies>
       <TypeLibraryFile>.\bin\Release\fdm.tlb</TypeLibraryFile>
       <AdditionalManifestDependencies>type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='X86' publicKeyToken='6595b64144ccf1df' language='*';%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -468,6 +468,8 @@
     </ClCompile>
     <ClCompile Include="FDCButton.cpp">
     </ClCompile>
+    <ClCompile Include="Fdm5BannerManager.cpp" />
+    <ClCompile Include="Fdm5BannerWindow.cpp" />
     <ClCompile Include="FdmApp.cpp">
     </ClCompile>
     <ClCompile Include="FdmBalloon.cpp">
@@ -629,6 +631,7 @@
     </ClCompile>
     <ClCompile Include="TpDldSheet.cpp" />
     <ClCompile Include="TpDld_General.cpp" />
+    <ClCompile Include="vmsAppGenericInfoManager.cpp" />
     <ClCompile Include="vmsAppGlobalObjects.cpp" />
     <ClCompile Include="vmsAVMergerFFMPEG.cpp" />
     <ClCompile Include="vmsAVMergingMgr.cpp" />
@@ -1138,6 +1141,8 @@
     <ClInclude Include="DownloadsWnd.h" />
     <ClInclude Include="EnterKeyDlg.h" />
     <ClInclude Include="FDCButton.h" />
+    <ClInclude Include="Fdm5BannerManager.h" />
+    <ClInclude Include="Fdm5BannerWindow.h" />
     <ClInclude Include="FdmApp.h" />
     <ClInclude Include="FdmBalloon.h" />
     <ClInclude Include="FdmBalloon_Content.h" />
@@ -1254,6 +1259,8 @@
     <ClInclude Include="TpDldSheet.h" />
     <ClInclude Include="TpDld_General.h" />
     <ClInclude Include="vmsAppFileUpdateInfo.h" />
+    <ClInclude Include="vmsAppGenericInfo.h" />
+    <ClInclude Include="vmsAppGenericInfoManager.h" />
     <ClInclude Include="vmsAppGlobalObjects.h" />
     <ClInclude Include="vmsAVMerger.h" />
     <ClInclude Include="vmsAVMergerFFMPEG.h" />

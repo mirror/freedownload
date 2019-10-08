@@ -24,6 +24,7 @@
 #include "FDCButton.h"	
 #include "Wnd_FDMGetCustVer_Btn.h"
 #pragma warning (pop)
+#include "Fdm5BannerManager.h"
 
 #define WM_SHOWTRAYMENU			(WM_APP+101)
 #define WM_SHOWDOWNLOADDIALOG	(WM_APP+102)
@@ -377,12 +378,16 @@ protected:
 	vmsCriticalSection m_csExit;
 	bool m_bExitHandlerPerformed;
 	bool m_bBrowserPluginsSuggestionDeferred;
+	Fdm5BannerManager m_fdm5BannerMgr;
 
 public:
 	bool onExit(bool bQueryExit);
 
 private:
 	void UpadateTumToolbarState();
+	bool ShowFdm5BannerIfRequired(
+		bool dontCheckTime = false,
+		std::function<void(bool offerAccepted)> onClose = {});
 };
 
 //{{AFX_INSERT_LOCATION}}
