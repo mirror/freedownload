@@ -1,0 +1,10 @@
+{
+  "name": "com.vms.fdm",
+  "description": "FDM",
+  "path": "fdm_nativehost.exe",
+  "type": "stdio",
+  "allowed_extensions": [
+        "fdm_ffext@freedownloadmanager.org",
+        "fdm_ffext2@freedownloadmanager.org"
+    ]
+}
