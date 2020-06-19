@@ -1,16 +1,13 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
-
+// vmsAppHangDetector's thread_state::update must be periodically called by a monitoring thread
+// if thread do not call it during some time interval - it is treated as "hunged".
 class vmsAppHangDetector :
 	public vmsCreatesThreads2,
 	public vmsThreadSafe3,
 	protected vmsConsumesVaEvents
 {
 public:
-	static const int hang_timeout = 60; 
+	static const int hang_timeout = 60; // in seconds
 
 public:
 	vmsAppHangDetector (std::shared_ptr <vmsRunTimer> run_timer) :
@@ -122,7 +119,7 @@ protected:
 				auto last_timer = ts->timer_last_value ();
 				if (cur_timer > last_timer + hang_timeout)
 				{
-					
+					// a thread hang detected
 					on_thread_hang (item.first);
 				}
 			}
@@ -133,6 +130,6 @@ protected:
 	{
 		char *p = nullptr;
 		++p;
-		*p = 0; 
+		*p = 0; // crash the app
 	}
 };

@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "os\vmsOsVersion.h"
 #include "win\version.h"
@@ -14,7 +10,7 @@ public:
 		ZeroMemory (&m_ver, sizeof (m_ver));
 		m_ver.dwOSVersionInfoSize = sizeof (m_ver);
 		if (!vmsGetVersion ((LPOSVERSIONINFO)&m_ver))
-			m_ver.dwMajorVersion = 0; 
+			m_ver.dwMajorVersion = 0; // to be ensure isValid will return false
 		assert (m_ver.dwMajorVersion != 0);
 	}
 

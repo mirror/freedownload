@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "vmsCommandLine.h"
 #include "../stringh.h"
@@ -46,10 +42,10 @@ inline void vmsOpenUrlInBrowser (LPCTSTR pszUrl)
 	else
 		return;
 	
-	
+	// get default path to a browser
 
-	
-	
+	// since Vista the registry entry for default browser has changed
+	// details: https://newoldthing.wordpress.com/2007/03/23/how-does-your-browsers-know-that-its-not-the-default-browser/
 	vmsWinOsVersion osver;
 	if (osver.isVistaOrHigher())
 	{
@@ -103,7 +99,7 @@ inline void vmsOpenUrlInBrowser (LPCTSTR pszUrl)
 
 	cl.fromString (tszCmdLine);
 
-	
+	// just the additional check
 	_tcslwr (tszCmdLine);
 	if (!_tcsstr (tszCmdLine, _T (".exe")))
 		goto _lErr;

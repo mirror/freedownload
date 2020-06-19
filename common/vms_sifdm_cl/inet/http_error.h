@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 namespace http_error {
@@ -10,10 +6,10 @@ enum http_error	{
 	continue_request		= 100,
 	switching_protocols		= 101,
 	ok						= 200,
-	moved					= 301, 
-	redirect				= 302, 
-	redirect_method			= 303, 
-	redirect_keep_verb		= 307, 
+	moved					= 301, // object permanently moved
+	redirect				= 302, // object temporarily moved
+	redirect_method			= 303, // redirection w/ new access method
+	redirect_keep_verb		= 307, // HTTP/1.1: keep same verb
 	forbidden				= 403,
 	gateway_timeout			= 504,
 	version_not_supported	= 505
@@ -68,7 +64,7 @@ inline std::error_condition make_error_condition (http_error e)
 		static_cast <int> (e), category ());
 }
 
-} 
+} // namespace http_error
 
 namespace std
 {

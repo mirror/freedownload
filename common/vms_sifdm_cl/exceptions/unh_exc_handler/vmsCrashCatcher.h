@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <fstream>
 #include "../vmsExceptionLog.h"
@@ -123,7 +119,7 @@ protected:
 
 	tstring CreateDump (PEXCEPTION_POINTERS pEP, DWORD thread_id) const
 	{
-		
+		// create crash dump file
 
 		MINIDUMP_EXCEPTION_INFORMATION eInfo;
 		eInfo.ThreadId = thread_id;
@@ -170,7 +166,7 @@ protected:
 
 		m_tstrDumpFile = CreateDump (pEP, thread_id);
 
-		
+		// query basic crash info (module name and crash address)
 
 		MEMORY_BASIC_INFORMATION mbi;
 		SIZE_T nSize = VirtualQuery (pEP->ExceptionRecord->ExceptionAddress, &mbi, sizeof(mbi));
@@ -209,6 +205,7 @@ protected:
 
 protected:
 	virtual void onCrashDumpCreated () = NULL;
+
 
 protected:
 	inline void LogException (PEXCEPTION_POINTERS pEP)

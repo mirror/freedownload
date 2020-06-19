@@ -1,74 +1,100 @@
+#pragma once
+
 /*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
+********** Author : Mohammed Nisamudheen S.  **********
+********** Email  : nizam_clt@rediffmail.com **********
+********** Date   : 12.4.2005                **********
+********** URL    : www.uslindia.com         **********
 */
 
-#pragma once
+//The following structures are taken from iconpro sdk example
 
 #pragma pack( push )
 #pragma pack( 2 )
 typedef struct
 {
-	BYTE	bWidth;               
-	BYTE	bHeight;              
-	BYTE	bColorCount;          
-	BYTE	bReserved;            
-	WORD	wPlanes;              
-	WORD	wBitCount;            
-	DWORD	dwBytesInRes;         
-	WORD	nID;                  
+	BYTE	bWidth;               // Width of the image
+	BYTE	bHeight;              // Height of the image (times 2)
+	BYTE	bColorCount;          // Number of colors in image (0 if >=8bpp)
+	BYTE	bReserved;            // Reserved
+	WORD	wPlanes;              // Color Planes
+	WORD	wBitCount;            // Bits per pixel
+	DWORD	dwBytesInRes;         // how many bytes in this resource?
+	WORD	nID;                  // the ID
 } MEMICONDIRENTRY, *LPMEMICONDIRENTRY;
 typedef struct
 {
-	WORD			idReserved;   
-	WORD			idType;       
-	WORD			idCount;      
-	MEMICONDIRENTRY	idEntries [1]; 
+	WORD			idReserved;   // Reserved
+	WORD			idType;       // resource type (1 for icons)
+	WORD			idCount;      // how many images?
+	MEMICONDIRENTRY	idEntries [1]; // the entries for each image
 } MEMICONDIR, *LPMEMICONDIR;
 #pragma pack( pop )
 
 typedef struct
 {
-	UINT			Width, Height, Colors; 
-	LPBYTE			lpBits;                
-	DWORD			dwNumBytes;            
-	LPBITMAPINFO	lpbi;                  
-	LPBYTE			lpXOR;                 
-	LPBYTE			lpAND;                 
+	UINT			Width, Height, Colors; // Width, Height and bpp
+	LPBYTE			lpBits;                // ptr to DIB bits
+	DWORD			dwNumBytes;            // how many bytes?
+	LPBITMAPINFO	lpbi;                  // ptr to header
+	LPBYTE			lpXOR;                 // ptr to XOR image bits
+	LPBYTE			lpAND;                 // ptr to AND image bits
 } ICONIMAGE, *LPICONIMAGE;
 typedef struct
 {
-	BOOL		bHasChanged;                     
-	UINT		nNumImages;                      
-	ICONIMAGE	IconImages [1];                   
+	BOOL		bHasChanged;                     // Has image changed?
+	UINT		nNumImages;                      // How many images?
+	ICONIMAGE	IconImages [1];                   // Image entries
 } ICONRESOURCE, *LPICONRESOURCE;
 
+
+// These next two structs represent how the icon information is stored
+// in an ICO file.
 typedef struct
 {
-	BYTE	bWidth;               
-	BYTE	bHeight;              
-	BYTE	bColorCount;          
-	BYTE	bReserved;            
-	WORD	wPlanes;              
-	WORD	wBitCount;            
-	DWORD	dwBytesInRes;         
-	DWORD	dwImageOffset;        
+	BYTE	bWidth;               // Width of the image
+	BYTE	bHeight;              // Height of the image (times 2)
+	BYTE	bColorCount;          // Number of colors in image (0 if >=8bpp)
+	BYTE	bReserved;            // Reserved
+	WORD	wPlanes;              // Color Planes
+	WORD	wBitCount;            // Bits per pixel
+	DWORD	dwBytesInRes;         // how many bytes in this resource?
+	DWORD	dwImageOffset;        // where in the file is this image
 } ICONDIRENTRY, *LPICONDIRENTRY;
 typedef struct
 {
-	WORD			idReserved;   
-	WORD			idType;       
-	WORD			idCount;      
-	ICONDIRENTRY	idEntries [1]; 
+	WORD			idReserved;   // Reserved
+	WORD			idType;       // resource type (1 for icons)
+	WORD			idCount;      // how many images?
+	ICONDIRENTRY	idEntries [1]; // the entries for each image
 } ICONDIR, *LPICONDIR;
 
+
 #define ICON_EXCTRACTOR_WIDTHBYTES(bits)      ((((bits) + 31)>>5)<<2)
+
 
 class CIconExtractor
 {
 
 public:
 
-	
+	/****************************************************************************
+*
+*     FUNCTION: ExtractIconFromExe
+*
+*     PURPOSE:  Extracts the specified icon usualy the application icon
+*
+*     PARAMS:   LPCSTR      SourceEXE    - the source exe
+*               LPCSTR      TargetICON   - name of the icon file
+*               UINT        IconIndex    - icon index < MAX_ICONS
+*
+*     RETURNS:  DWORD - Indicates the error code
+*
+*     History:
+*
+*               April 2005 - Created
+*
+\****************************************************************************/
 
 	DWORD ExtractIconFromExe (LPCTSTR SourceEXE,
 		LPCTSTR TargetICON,
@@ -78,16 +104,16 @@ public:
 		HINSTANCE        	hLibrary;
 		DWORD               ret;
 
-		
+		//assert(IconIndex < MAX_ICONS);
 
-		
+		// Load the EXE - NOTE: must be a 32bit EXE for this to work
 		if ((hLibrary = LoadLibraryEx (SourceEXE, NULL, LOAD_LIBRARY_AS_DATAFILE)) == NULL)
 			return GetLastError ();
 
 		HRSRC        	hRsrc = NULL;
 		HGLOBAL        	hGlobal = NULL;
 		LPMEMICONDIR    lpIcon = NULL;
-		
+		//UINT i;
 
 		m_vIconsInfo.clear ();
 		ret = EnumResourceNames (hLibrary, RT_GROUP_ICON, EnumResNameProc, (LONG_PTR)this);
@@ -123,14 +149,15 @@ public:
 
 		if ((int)m_vIconsInfo.size () > IconIndex)
 		{
-			
-			
+			// Find the group icon resource
+			//Finding the resource with the ID first
 
 			if (m_vIconsInfo [IconIndex].strIconName.empty ())
 				hRsrc = FindResource (hLibrary, MAKEINTRESOURCE (m_vIconsInfo [IconIndex].uIconID), RT_GROUP_ICON);
 			else
 				hRsrc = FindResource (hLibrary, m_vIconsInfo [IconIndex].strIconName.c_str (), RT_GROUP_ICON);
 		}
+
 
 		if (hRsrc == NULL)
 		{
@@ -164,7 +191,7 @@ public:
 			return E_UNEXPECTED;
 		}
 
-		
+		// Allocate enough memory for the images
 		if ((lpIR = (LPICONRESOURCE)malloc (sizeof (ICONRESOURCE) + ((lpIcon->idCount - 1) * sizeof (ICONIMAGE)))) == NULL)
 		{
 			ret = GetLastError ();
@@ -172,13 +199,15 @@ public:
 			return ret;
 		}
 
-		
+
+		// Fill in local struct members
 		lpIR->nNumImages = lpIcon->idCount;
 
-		
+
+		// Loop through the images
 		for (UINT i = 0; i < lpIR->nNumImages; i++)
 		{
-			
+			// Get the individual image
 			if ((hRsrc = FindResource (hLibrary, MAKEINTRESOURCE (lpIcon->idEntries [i].nID), RT_ICON)) == NULL)
 			{
 				ret = GetLastError ();
@@ -193,7 +222,7 @@ public:
 				free (lpIR);
 				return ret;
 			}
-			
+			// Store a copy of the resource locally
 			lpIR->IconImages [i].dwNumBytes = SizeofResource (hLibrary, hRsrc);
 
 			lpIR->IconImages [i].lpBits = (LPBYTE)malloc (lpIR->IconImages [i].dwNumBytes);
@@ -206,7 +235,7 @@ public:
 
 			memcpy (lpIR->IconImages [i].lpBits, LockResource (hGlobal), lpIR->IconImages [i].dwNumBytes);
 
-			
+			// Adjust internal pointers
 			if (!AdjustIconImagePointers (&(lpIR->IconImages [i])))
 			{
 				ret = GetLastError ();
@@ -227,6 +256,7 @@ public:
 	{
 	}
 
+
 protected:
 	BOOL AddResource (LPCTSTR lpszType, LPTSTR lpszName)
 	{
@@ -234,9 +264,9 @@ protected:
 		{
 			__inc_IconInfo icon;
 
-			if ((ULONG)lpszName < 65536)
+			if ((ULONG)lpszName < 65536)//ID
 				icon.uIconID = (ULONG)lpszName;
-			else 
+			else //NAME
 				icon.strIconName = lpszName;
 
 			m_vIconsInfo.push_back (icon);
@@ -253,23 +283,23 @@ private:
 		DWORD    	dwBytesWritten;
 		DWORD		ret = 0;
 
-		
+		// open the file
 		if ((hFile = CreateFile (szFileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE)
 			return GetLastError ();
 
-		
+		// Write the header
 		if (WriteICOHeader (hFile, lpIR->nNumImages))
 		{
 			ret = GetLastError ();
 			CloseHandle (hFile);
 			return ret;
 		}
-		
+		// Write the ICONDIRENTRY's
 		for (i = 0; i < lpIR->nNumImages; i++)
 		{
 			ICONDIRENTRY    ide;
 
-			
+			// Convert internal format to ICONDIRENTRY
 			ide.bWidth = lpIR->IconImages [i].Width;
 			ide.bHeight = lpIR->IconImages [i].Height;
 			ide.bReserved = 0;
@@ -282,29 +312,29 @@ private:
 			ide.dwBytesInRes = lpIR->IconImages [i].dwNumBytes;
 			ide.dwImageOffset = CalculateImageOffset (lpIR, i);
 
-			
+			// Write the ICONDIRENTRY out to disk
 			if (!WriteFile (hFile, &ide, sizeof (ICONDIRENTRY), &dwBytesWritten, NULL))
 				return GetLastError ();
 
-			
+			// Did we write a full ICONDIRENTRY ?
 			if (dwBytesWritten != sizeof (ICONDIRENTRY))
 				return GetLastError ();
 		}
-		
+		// Write the image bits for each image
 		for (i = 0; i < lpIR->nNumImages; i++)
 		{
 			DWORD dwTemp = lpIR->IconImages [i].lpbi->bmiHeader.biSizeImage;
 
-			
+			// Set the sizeimage member to zero
 			lpIR->IconImages [i].lpbi->bmiHeader.biSizeImage = 0;
-			
+			// Write the image bits to file
 			if (!WriteFile (hFile, lpIR->IconImages [i].lpBits, lpIR->IconImages [i].dwNumBytes, &dwBytesWritten, NULL))
 				return GetLastError ();
 
 			if (dwBytesWritten != lpIR->IconImages [i].dwNumBytes)
 				return GetLastError ();
 
-			
+			// set it back
 			lpIR->IconImages [i].lpbi->bmiHeader.biSizeImage = dwTemp;
 		}
 		CloseHandle (hFile);
@@ -313,20 +343,20 @@ private:
 
 	BOOL AdjustIconImagePointers (LPICONIMAGE lpImage)
 	{
-		
+		// Sanity check
 		if (lpImage == NULL)
 			return FALSE;
-		
+		// BITMAPINFO is at beginning of bits
 		lpImage->lpbi = (LPBITMAPINFO)lpImage->lpBits;
-		
+		// Width - simple enough
 		lpImage->Width = lpImage->lpbi->bmiHeader.biWidth;
-		
+		// Icons are stored in funky format where height is doubled - account for it
 		lpImage->Height = (lpImage->lpbi->bmiHeader.biHeight) / 2;
-		
+		// How many colors?
 		lpImage->Colors = lpImage->lpbi->bmiHeader.biPlanes * lpImage->lpbi->bmiHeader.biBitCount;
-		
+		// XOR bits follow the header and color table
 		lpImage->lpXOR = (PBYTE)FindDIBBits ((LPSTR)lpImage->lpbi);
-		
+		// AND bits follow the XOR bits
 		lpImage->lpAND = lpImage->lpXOR + (lpImage->Height*BytesPerLine ((LPBITMAPINFOHEADER)(lpImage->lpbi)));
 		return TRUE;
 	}
@@ -373,25 +403,25 @@ private:
 		WORD    Output;
 		DWORD	dwBytesWritten;
 
-		
+		// Write 'reserved' WORD
 		Output = 0;
 		if (!WriteFile (hFile, &Output, sizeof (WORD), &dwBytesWritten, NULL))
 			return GetLastError ();
-		
+		// Did we write a WORD?
 		if (dwBytesWritten != sizeof (WORD))
 			return GetLastError ();
-		
+		// Write 'type' WORD (1)
 		Output = 1;
 		if (!WriteFile (hFile, &Output, sizeof (WORD), &dwBytesWritten, NULL))
 			return GetLastError ();
-		
+		// Did we write a WORD?
 		if (dwBytesWritten != sizeof (WORD))
 			return GetLastError ();
-		
+		// Write Number of Entries
 		Output = (WORD)nNumEntries;
 		if (!WriteFile (hFile, &Output, sizeof (WORD), &dwBytesWritten, NULL))
 			return GetLastError ();
-		
+		// Did we write a WORD?
 		if (dwBytesWritten != sizeof (WORD))
 			return GetLastError ();
 
@@ -403,28 +433,28 @@ private:
 		DWORD	dwSize;
 		UINT    i;
 
-		
+		// Calculate the ICO header size
 		dwSize = 3 * sizeof (WORD);
-		
+		// Add the ICONDIRENTRY's
 		dwSize += lpIR->nNumImages * sizeof (ICONDIRENTRY);
-		
+		// Add the sizes of the previous images
 		for (i = 0; i < nIndex; i++)
 			dwSize += lpIR->IconImages [i].dwNumBytes;
-		
+		// we're there - return the number
 		return dwSize;
 	}
 
 	struct __inc_IconInfo {
-		ULONG uIconID; 
+		ULONG uIconID; //valid if icon name is empty
 		std::wstring strIconName;
 	};
 	std::vector <__inc_IconInfo> m_vIconsInfo;
 
 	BOOL static CALLBACK EnumResNameProc (
-		HMODULE hModule,   
-		LPCTSTR lpszType,  
-		LPTSTR lpszName,   
-		LONG_PTR lParam)    
+		HMODULE hModule,   // module handle
+		LPCTSTR lpszType,  // resource type
+		LPTSTR lpszName,   // resource name
+		LONG_PTR lParam)    // application-defined parameter
 	{
 		CIconExtractor *ptr = (CIconExtractor*)lParam;
 		return ptr->AddResource (lpszType, lpszName);

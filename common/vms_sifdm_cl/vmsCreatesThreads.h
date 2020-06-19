@@ -1,6 +1,4 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
+/* Deprecated. Should not be used in a new code. */
 
 #pragma once
 #include <map>
@@ -16,7 +14,7 @@ public:
 
 	virtual ~vmsCreatesThreads()
 	{
-		
+		// derived class must call Shutdown(true) in its destructor to terminate all the threads
 		assert(m_vThreads.empty());
 		assert(m_vThreadsObsolete.empty());
 		CloseHandle(m_hevShuttingDown);
@@ -67,7 +65,7 @@ public:
 			WaitForSingleObject(spHandle->getHandle (), INFINITE);
 			
 			{
-				
+				// thread could be terminated
 				vmsAUTOLOCKSECTION(m_csThreads);
 				if (!m_vThreads.empty () && m_vThreads.begin ()->first == threadId)
 				{
@@ -106,6 +104,8 @@ public:
 		return m_vThreads.size () + m_vThreadsObsolete.size ();
 	}
 
+// -----
+// called by a thread automatically
 public:
 	void onThreadCreated(vmsThread *thread)
 	{
@@ -131,9 +131,10 @@ public:
 			}
 		}
 	}
+// -----
 
 protected:
-	
+	// obsolete
 	void onThreadCreated(vmsWinHandle::tSP sphThread) 
 	{
 		assert(sphThread != NULL && sphThread->m_handle != NULL);
@@ -143,8 +144,9 @@ protected:
 		m_vThreadsObsolete.push_back(sphThread);
 	}
 
+
 protected:
-	
+	// can be called to create "a standard thread"
 	vmsWinHandle::tSP CreateThread(unsigned(__stdcall *start_address)(vmsCreatesThreads*), char *threadName = nullptr)
 	{
 		vmsThread *thread = new vmsThread(this, (unsigned(__stdcall *)(void*))start_address, this, threadName);
@@ -156,7 +158,7 @@ protected:
 		return thread->handle();
 	}
 
-	
+	// returns true in case Shutdown event occurred
 	bool WaitForShutdownEvent(unsigned uMilliseconds)
 	{
 		return WaitForSingleObject(m_hevShuttingDown, uMilliseconds) == WAIT_OBJECT_0;
@@ -168,6 +170,8 @@ protected:
 	mutable vmsCriticalSection m_csThreads;
 	HANDLE m_hevShuttingDown;
 };
+
+
 
 static unsigned _stdcall ThreadEntryPoint::threadMain(void *pv)
 {

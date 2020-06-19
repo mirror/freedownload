@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 class vmsHttpParser  
@@ -29,7 +25,7 @@ public:
 	{
 		m_vFields.clear ();
 
-		pszHdr = strstr (pszHdr, "\r\n"); 
+		pszHdr = strstr (pszHdr, "\r\n"); // skip 1st line
 		if (!pszHdr)
 			return;
 		pszHdr += 2;

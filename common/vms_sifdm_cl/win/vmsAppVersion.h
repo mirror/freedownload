@@ -1,13 +1,9 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 struct vmsAppVersionPart
 {
 	DWORD dwVal;
-	int cPreZeros; 
+	int cPreZeros; // e.g. "5.02"(=1) vs "5.2"(=0)
 
 	vmsAppVersionPart (LPCTSTR ptsz) 
 	{
@@ -77,12 +73,12 @@ class vmsAppVersion : public std::vector <vmsAppVersionPart>
 public:
 	enum CompareType 
 	{
-		CT_INTEGER,  
-		CT_FLOATING, 
+		CT_INTEGER,  // 5.1 is less than 5.10
+		CT_FLOATING, // 5.1 is equal to 5.10
 	};
 
 public:
-	void toFloat (float *pfMajor , float *pfMinor ) const
+	void toFloat (float *pfMajor /*can be NULL*/, float *pfMinor /*can be NULL*/) const
 	{
 		if (pfMajor)
 			*pfMajor = 0;
@@ -92,7 +88,7 @@ public:
 		if (empty ())
 			return;
 
-		
+		// major part
 
 		if (size () == 1)
 		{
@@ -111,7 +107,7 @@ public:
 			}
 		}
 
-		
+		// minor part
 
 		if (!pfMinor)
 			return;
@@ -179,7 +175,7 @@ public:
 			if (*((vector<vmsAppVersionPart>*)this) == *(vector<vmsAppVersionPart>*)&ver)
 				return 0;
 
-			
+			// check "3.0" vs "3.0.0" case
 			if (size () != ver.size ())
 			{
 				const vmsAppVersion &verMinSize = size () < ver.size () ? *this : ver;
@@ -305,7 +301,7 @@ public:
 		return s;
 	}
 
-	tstring m_tstrPostVersion; 
+	tstring m_tstrPostVersion; //i.e. " alpha" for "5.1 alpha" or "a" for "5.1a"
 
 	vmsAppVersion()
 	{

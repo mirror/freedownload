@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "vmsCrashCatcher.h"
 #include "vmsCrashReporter.h"
@@ -94,7 +90,7 @@ protected:
 		if (!(m_flags & DontTerminateProcess))
 			TerminateProcess (GetCurrentProcess (), 1);
 		else
-			vmsCrashCatcher::Stop (); 
+			vmsCrashCatcher::Stop (); // just in case
 	}
 
 public:

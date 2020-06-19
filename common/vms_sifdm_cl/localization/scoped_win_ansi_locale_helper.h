@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "scoped_override_locale.h"
 class scoped_win_ansi_locale_helper :

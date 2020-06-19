@@ -1,8 +1,15 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
+
+// make enum easy serializable
+
+/* example:
+enum eTEST = {E1, E2, E3};
+ENUM_STREAM_SUPPORT_BEGIN (eTEST)
+	ENUM_STREAM_SUPPORT_ENTRY (E1, L"E1")
+	ENUM_STREAM_SUPPORT_ENTRY (E2, L"E2")
+	ENUM_STREAM_SUPPORT_ENTRY (E3, L"E3")
+ENUM_STREAM_SUPPORT_END (eTEST)
+*/
 
 #define ENUM_STREAM_SUPPORT_BEGIN(ENUM) __declspec(selectany) std::pair <ENUM, std::wstring> g_ssm_##ENUM [] = {
 #define ENUM_STREAM_SUPPORT_ENTRY(val, str) std::make_pair (val, str),

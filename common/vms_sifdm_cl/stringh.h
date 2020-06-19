@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <atlbase.h>
 #include <assert.h>
@@ -155,6 +151,7 @@ inline tstring tstringFromString (const std::string& str)
 	return str;
 #endif
 }
+
 
 template <class tString>
 inline int stringCompareN (const tString& str, typename tString::size_type pos, const tString& str2)

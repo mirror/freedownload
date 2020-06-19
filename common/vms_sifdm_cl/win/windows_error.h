@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <wininet.h>
 
@@ -77,7 +73,7 @@ namespace windows_error {
 		return make_error_code (static_cast <windows_error> (GetLastError ()));
 	}
 
-} 
+} // namespace windows_error
 
 namespace std
 {

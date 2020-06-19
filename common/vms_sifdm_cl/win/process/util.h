@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <Psapi.h>
 #include "../misc/vmsAvUtil.h"
@@ -21,16 +17,16 @@ inline HMODULE vmsLoadDllIntoProcess (HANDLE hProcess, LPCTSTR ptszDllName)
 {
 	HANDLE hThread = NULL;
 
-	void* pLibRemote = NULL;   
-	
-	DWORD  hLibModule = 0;   
+	void* pLibRemote = NULL;   // The address (in the remote process) where 
+	// szLibPath will be copied to;
+	DWORD  hLibModule = 0;   // Base address of loaded module (==HMODULE);
 	HMODULE hKernel32 = ::GetModuleHandle(_T ("Kernel32"));
 
-	
-	
+	// initialize szLibPath
+	//...
 
-	
-	
+	// 1. Allocate memory in the remote process for szLibPath
+	// 2. Write szLibPath to the allocated memory
 	pLibRemote = ::VirtualAllocEx (hProcess, NULL, (_tcslen (ptszDllName)+1) * sizeof (TCHAR), MEM_COMMIT, 
 		PAGE_READWRITE);
 	if (!pLibRemote)
@@ -53,8 +49,8 @@ inline HMODULE vmsLoadDllIntoProcess (HANDLE hProcess, LPCTSTR ptszDllName)
 		psz++;
 	psz += 17;
 
-	
-	
+	// Load dll into the remote process
+	// (via CreateRemoteThread & LoadLibrary)
 	auto kernel_fn_addr = GetProcAddress (hKernel32, psz);
 	const bool kernel_fn_addr_valid = vmsModuleFromAddress (kernel_fn_addr) == hKernel32;
 	assert (kernel_fn_addr_valid);
@@ -67,10 +63,10 @@ inline HMODULE vmsLoadDllIntoProcess (HANDLE hProcess, LPCTSTR ptszDllName)
 	{
 		::WaitForSingleObject (hThread, INFINITE);
 
-		
+		// Get handle of the loaded module
 		::GetExitCodeThread (hThread, &hLibModule);
 
-		
+		// Clean up
 		::CloseHandle (hThread);
 	}
 
@@ -91,8 +87,8 @@ inline BOOL vmsFreeDllFromProcess (HANDLE hProcess, HMODULE hDll)
 		psz++;
 	psz += 17;
 
-	
-	
+	// Load dll into the remote process
+	// (via CreateRemoteThread & LoadLibrary)
 	hThread = vmsAvUtil::CreateRemoteThread (hProcess, NULL, 0, 
 		(LPTHREAD_START_ROUTINE)GetProcAddress (hKernel32, psz), 
 		hDll, 0, NULL);
@@ -103,10 +99,10 @@ inline BOOL vmsFreeDllFromProcess (HANDLE hProcess, HMODULE hDll)
 	{
 		::WaitForSingleObject (hThread, INFINITE);
 
-		
+		// Get handle of the loaded module
 		::GetExitCodeThread (hThread, &dwResult);
 
-		
+		// Clean up
 		::CloseHandle (hThread);
 	}
 

@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 template <class TLockable>
@@ -47,22 +43,24 @@ private:
 	vmsLockableAutolock& operator= (const vmsLockableAutolock&);
 };
 
+
 class vmsLockable
 {
 public:
 	typedef vmsLockableAutolock <vmsLockable> tAutolock;
 	typedef std::shared_ptr <tAutolock> tspAutolock;
 public:
-	
-	
+	// locking / unlocking
+	// derived class must implement these function to be a thread safe
 	virtual void Lock () const {}
 	virtual void Unlock () const {}
-	
+	// a more convenient way to lock an object
 	virtual tspAutolock LockAuto () const
 	{
 		return std::make_shared <tAutolock> (this);
 	}
 };
+
 
 #define vmsLockable_ImplementDelegatedTo(obj) \
 	virtual void Lock () const override {obj.Lock ();} \

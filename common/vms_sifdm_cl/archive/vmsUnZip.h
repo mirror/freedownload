@@ -6,13 +6,11 @@ class vmsUnZip
 public:
 	static BOOL Unpack(LPCTSTR ptszFileName, LPCTSTR ptszDstFolder, vmsError& error)
 	{
-		USES_CONVERSION;
-
 		error.clear();
 
 		BOOL result = FALSE;
 
-		unzFile zipFile = unzOpen(T2A((LPTSTR)ptszFileName));
+		unzFile zipFile = unzOpen(stringFromTstring(ptszFileName).c_str());
 
 		if (NULL != zipFile)
 		{
@@ -32,7 +30,7 @@ public:
 							assert (fi.uncompressed_size == 0);
 							tstring tstr = ptszDstFolder;
 							tstr += '\\';
-							tstr += CA2TEX<> (filename);
+							tstr += tstringFromString(filename);
 							tstr += '1';
 							vmsBuildPathToFile (tstr.c_str ());
 							result = TRUE;
@@ -43,15 +41,14 @@ public:
 							std::vector <BYTE> fileData (dataLen ? dataLen : 1);
 							if (dataLen == unzReadCurrentFile(zipFile, &fileData.front (), dataLen))
 							{
-								char filePathName[MAX_PATH] = { 0 };
-								strcat(filePathName, T2A((LPTSTR)ptszDstFolder));
-								strcat(filePathName, "\\");
-								strcat(filePathName, filename);
-								FILE* pFile = fopen(filePathName, "wb");
+								tstring filePathName = ptszDstFolder;
+								filePathName += _T("\\");
+								filePathName += tstringFromString(filename);
+								FILE* pFile = fopen(stringFromTstring(filePathName).c_str(), "wb");
 								if (!pFile)
 								{
-									vmsBuildPathToFile (CA2TEX<> (filePathName));
-									pFile = fopen (filePathName, "wb");
+									vmsBuildPathToFile (filePathName.c_str());
+									pFile = fopen (stringFromTstring(filePathName).c_str(), "wb");
 								}
 								if (pFile)
 								{

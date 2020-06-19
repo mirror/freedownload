@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once 
 
 class vmsXmlUtil
@@ -24,9 +20,9 @@ public:
 			tstringReplace (tstr2, _T ("'"), _T ("&apos;"));
 		tstringReplace (tstr2, _T ("\""), _T ("&quot;"));
 
-		
+		// unicode string
 		wchar_t *pwsz = new wchar_t [tstr2.length ()*2 + 1];
-		
+		// unicode string without XML-bad characters
 		wchar_t *pwsz2 = new wchar_t [tstr2.length ()*2 + 1];
 
 #if defined (UNICODE) || defined (_UNICODE)
@@ -48,9 +44,9 @@ public:
 
 		int len = (int)wcslen (pwsz);
 
-		
-		
-		
+		//////////////////////////////////////////////////////////////////////////
+		// remove bad characters
+		// http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char
 		int j = 0;
 		for (int i = 0; i < len; i++)
 		{
@@ -65,7 +61,7 @@ public:
 		}
 
 		pwsz2 [j] = 0;
-		
+		//////////////////////////////////////////////////////////////////////////
 
 		LPSTR psz = new char [6*len + 1];
 		if (0 == WideCharToMultiByte (CP_UTF8, 0, pwsz2, -1, psz, 6*len + 1, NULL, NULL))

@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include <winternl.h>
@@ -25,6 +21,7 @@ public:
 		key.QueryStringValue (_T ("Path"), tsz, &dw);
 		return tsz;
 	}
+
 
 	static bool GetProcessCommandLine (DWORD dwPID, LPWSTR pwszCmdLine, UINT *puLen)
 	{
@@ -88,6 +85,7 @@ public:
 		return *pwszCmdLine != 0;
 	}
 
+
 	static DWORD GetModuleFileNameEx (HANDLE hProcess, HMODULE hModule, LPTSTR ptszFileName, DWORD nSize)
 	{
 		typedef DWORD (WINAPI *FNGMFNEX)(HANDLE, HMODULE, LPTSTR, DWORD);
@@ -111,7 +109,8 @@ public:
 		return dwRet;
 	}
 
-	
+
+	// returns true if icon index is specified or false otherwise
 	static bool ExtractIconAndId(tstring& tstrIcon, int* piIconIndex)
 	{
 		if (tstrIcon.empty ())
@@ -138,12 +137,13 @@ public:
 				if (piIconIndex)
 					*piIconIndex = _ttoi (ptsz + 1);
 				tstrIcon.erase (tstrIcon.end () - (ptsz2 - ptsz), tstrIcon.end ());
-				return true; 
+				return true; // index is specified
 			}
 		}
 
-		return false; 
+		return false; // index is not specified
 	}
+
 
 	static BOOL GetFileTime (LPCTSTR ptszFile, LPFILETIME lpCreationTime, LPFILETIME lpLastAccessTime, LPFILETIME lpLastWriteTime)
 	{
@@ -162,6 +162,7 @@ public:
 		return bOK;
 	}
 
+
 	static BOOL IsWow64()
 	{
 #ifdef _WIN64
@@ -176,7 +177,7 @@ public:
 		{
 			if (!fnIsWow64Process (GetCurrentProcess (), &bIsWow64))
 			{
-				
+				// handle error
 			}
 		}
 

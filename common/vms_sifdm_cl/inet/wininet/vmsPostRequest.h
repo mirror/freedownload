@@ -1,11 +1,8 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "../vmsInternetOperationInitializationData.h"
 #include "../../error/vmsErrorCodeProvider.h"
-
+// old code 
+// todo: refactor it
 class vmsPostRequest :
 	public vmsInternetOperationInitializationDataReceiver,
 	public vmsErrorCodeProvider
@@ -98,21 +95,24 @@ public:
 	if (!InitWinInetHandlesForRequest (ptszServer, ptszFilePath, uPort))
 		return FALSE;
 
-	
+	//ApplyProxyAuth (m_hRequest);
 
 	std::string strLabel = "---------------------------284583012225az7";
 
 	CHAR szHdr [10000] = "Content-Type: multipart/form-data; boundary=";
 	strcat (szHdr, strLabel.c_str ());
 
-	
+	/*
+	// append cookie field
+	_tcscat (tszHdr, _T ("\r\n"));
+	_stprintf (tszHdr + _tcslen (tszHdr), _T ("Cookie: %s"), _T ("cookies"));*/
 
 	INTERNET_BUFFERSA buffs;
 	ZeroMemory (&buffs, sizeof (buffs));
 	buffs.dwStructSize = sizeof (buffs);
 	buffs.lpcszHeader = szHdr;
 	buffs.dwHeadersLength = buffs.dwHeadersTotal = (DWORD)strlen (szHdr);
-	buffs.dwBufferTotal = (DWORD)strLabel.length () + 4; 
+	buffs.dwBufferTotal = (DWORD)strLabel.length () + 4; /*<label>\r\n--*/
 
 	for (int step = 0; step < 2; step++)
 	for (size_t i = 0; i < m_vParts.size (); i++)
@@ -136,7 +136,7 @@ Content-Type: application/octet-stream\r\n\r\n",
 
 		if (step == 0)
 		{
-			buffs.dwBufferTotal += (DWORD)strlen (sz) + m_vParts [i].dwSize + 2 ;
+			buffs.dwBufferTotal += (DWORD)strlen (sz) + m_vParts [i].dwSize + 2 /*\r\n*/;
 			continue;
 		}
 		else if (i == 0)
@@ -190,7 +190,7 @@ Content-Type: application/octet-stream\r\n\r\n",
 	return TRUE;
 	}
 
-	
+	//WARNING: pData should be the valid pointer until sending the request to server.
 	void AddPart (LPCSTR ptszName, LPCSTR ptszFileName, LPCVOID pData, DWORD dwSize, bool bFreeData = false)
 	{
 		assert (ptszName != NULL);
@@ -226,7 +226,7 @@ Content-Type: application/octet-stream\r\n\r\n",
 		if (!InitWinInetHandlesForRequest (ptszServer, ptszFilePath, uPort))
 			return FALSE;
 
-		
+		//ApplyProxyAuth (m_hRequest);
 
 		tstring tstrContentTypeHdr;
 		if (ptszContentType)
@@ -313,7 +313,7 @@ Content-Type: application/octet-stream\r\n\r\n",
 protected:
 	static void PostInitWinInetHandle (HINTERNET hInet)
 	{
-		
+		// disable "Autodial" IE window on no connection
 		BOOL bDisable = TRUE;
 		InternetSetOption (hInet, INTERNET_OPTION_DISABLE_AUTODIAL, &bDisable, sizeof (bDisable));
 

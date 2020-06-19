@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "vmsHttpParser.h"
 
@@ -51,6 +47,6 @@ public:
 
 protected:
 	string m_strHttpVersion;
-	string m_strResponseResult; 
+	string m_strResponseResult; // NUMBER and TEXT DESCRIPTION
 	UINT m_nStatusCode;
 };

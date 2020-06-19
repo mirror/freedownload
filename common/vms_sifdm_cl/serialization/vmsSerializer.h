@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include "vmsSerializationStoreMgr.h"
@@ -20,8 +16,8 @@ public:
 		if (!pObject || !pSerializationStore || !pSerializationStm)
 			return false;
 
-		
-		
+		// we may fail to load due to stream store absence (i.e. the object was not saved before)
+		// this case is not a error
 		bool bErrorOccured = false;
 
 		vmsSerializationInputStreamBinding *pSerializationStmBinding = dynamic_cast <vmsSerializationInputStreamBinding*> (pSerializationStm);
@@ -80,9 +76,9 @@ public:
 			if (pSerializationStmBinding->BindToStream (spStm))
 			{
 				bSetDirtyOnError = pObject->isDirty ();
-				pObject->setDirty (false); 
-				
-				
+				pObject->setDirty (false); // remove dirty flag before save
+				// if save will fail - we'll restore it
+				// if save will succeed - object will be not dirty or it will in case some modifications were made on object during save
 				bool bResult = pObject->Serialize (pSerializationStm) && pSerializationStmBinding->Flush () && 
 					pSerializationStore->MoveSecondaryStreamToPrimary (spStm);
 				pSerializationStmBinding->BindToStream (NULL);

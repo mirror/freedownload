@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 class vmsAvUtil  
@@ -16,6 +12,7 @@ public:
 			return NULL;
 		return pfn (hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter, dwCreationFlags, lpThreadId);
 	}
+
 
 	static HRESULT URLDownloadToFile (LPUNKNOWN p1,LPCTSTR p2,LPCTSTR p3,DWORD p4,LPBINDSTATUSCALLBACK p5)
 	{
@@ -35,6 +32,7 @@ public:
 		return pfn (p1, p2, p3, p4, p5);
 	}
 
+
 	static DWORD ExpandEnvironmentStrings(LPCTSTR p1,LPTSTR p2,DWORD p3)
 	{
 		HMODULE hDll = LoadLibrary (_T ("kernel32.dll"));
@@ -51,6 +49,7 @@ public:
 
 		return pfnExpandEnvironmentStrings (p1, p2, p3);
 	}
+
 
 	static BOOL CreateProcess (LPCTSTR p1,LPTSTR p2,LPSECURITY_ATTRIBUTES p3,LPSECURITY_ATTRIBUTES p4,BOOL p5,DWORD p6,LPVOID p7,LPCTSTR p8,LPSTARTUPINFO p9,LPPROCESS_INFORMATION p10)
 	{

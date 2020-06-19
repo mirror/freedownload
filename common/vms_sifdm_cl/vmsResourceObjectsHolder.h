@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <boost/thread/lockable_concepts.hpp>
 
@@ -40,16 +36,16 @@ protected:
 class vmsResourceObjectsHolderController 
 {
 public:
-	
-	
+	// method locks the resource holder
+	// another method which unlocks holder must be called after a job done.
 	virtual void waitForResourceNotBusy () = 0;
-	
-	
-	
+	// instructs the holder to release its reference to the resource so
+	// the resource can be modified (e.g. updated) safely
+	// note: the holder must be locked before calling method
 	virtual void releaseResourceReference () = 0;
-	
-	
-	
+	// instructs the holder to load resource
+	// note: the holder must be locked before calling method
+	// unlocks the holder
 	virtual void loadResource (const std::wstring& resourceLocation) = 0;
 	virtual ~vmsResourceObjectsHolderController () {}
 };

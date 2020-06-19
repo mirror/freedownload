@@ -1,13 +1,9 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "vmsHttpCookie.h"
 class vmsHttpRequestInitData
 {
 public:
-	
+	// each header must has its corresponding CRLF
 	void request_headers (const std::string &headers)
 	{
 		m_requestHeaders = headers;

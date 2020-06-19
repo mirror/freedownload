@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include "vmsSerializationStream.h"
@@ -24,7 +20,7 @@ public:
 
 	}
 
-	
+	// save/load
 	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags = 0)
 	{
 		assert (!"implemented");
@@ -43,8 +39,8 @@ public:
 		m_bDirty = bSet;
 	}
 
-	
-	
+	//////////////////////////////////////////////////////////////////////////
+	/// obsolete. should not be used in new code
 	virtual bool Serialize (vmsSerializationOutputStream *pStm) 
 	{
 		vmsSerializationIoStream stm (pStm);
@@ -55,14 +51,14 @@ public:
 		vmsSerializationIoStream stm (pStm);
 		return Serialize (&stm);
 	}
-	
+	//////////////////////////////////////////////////////////////////////////
 
 protected:
-	bool m_bDirty; 
+	bool m_bDirty; // was the object modified since last serialization?
 
 public:
-	
-	
+	// helper functions
+	// serialize object derived from vmsSerializable under a node with the specified name
 
 	template <class TObject>
 	static bool SerializeObject (vmsSerializationOutputStream *pStm, TObject *pObject, const std::wstring& wstrNodeName)
@@ -131,7 +127,7 @@ public:
 		pS->setDirty (bSet);
 	}
 
-	
+	// WARNING: is not for use with ENUM_STREAM_SUPPORT_BEGIN macro
 	template <class TEnum>
 	static bool SerializeEnum (vmsSerializationIoStream *pStm, const std::wstring& name, TEnum &enVal, bool bOptional = false)
 	{
@@ -175,7 +171,7 @@ public:
 	}
 
 protected:
-	
+	// helper methods to support merge mode 
 	bool SerializeValue (vmsSerializationIoStream *pStm, LPCWSTR pwszName, std::wstring& val, bool bMergeMode, bool bAttribute = true)
 	{
 		if (bMergeMode && pStm->isInputStream ())
@@ -193,7 +189,7 @@ protected:
 		return pStm->SerializeValue (pwszName, val, bAttribute);
 	}
 
-	
+	// bFailOnReadFail is used only in case bMergeMode is false
 	template <class TValue>
 	bool SerializeValueS (LPCWSTR pwszName, TValue& val, bool bMergeMode, bool bFailOnReadFail = true, bool bAttribute = true)
 	{
@@ -213,6 +209,7 @@ protected:
 	}
 };
 
+
 class vmsSerializableTs : public vmsSerializable,
 	public vmsThreadSafe
 {
@@ -231,12 +228,13 @@ public:
 	}
 };
 
+
 #include <map>
 
 template <class TSerializable>
 class vmsSerializableWithChildren : public TSerializable
 {
-public: 
+public: // serialization
 	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags = 0) override
 	{
 		for (auto it = m_mSerializableChildren.begin (); it != m_mSerializableChildren.end (); ++it)

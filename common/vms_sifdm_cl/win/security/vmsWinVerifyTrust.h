@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include <softpub.h>
@@ -32,6 +28,7 @@ public:
 
 		return lStatus == ERROR_SUCCESS;
 	}
+
 
 	static bool GetSubjectName (const std::wstring& wstrFile, std::wstring &wstrSubjectName)
 	{
@@ -75,7 +72,7 @@ public:
 		wstrSubjectNameTmp.resize (dwLen);
 		if (!CertGetNameString (pCertContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, NULL, &wstrSubjectNameTmp.front (), dwLen))
 			goto _lExit;
-		wstrSubjectNameTmp.resize (dwLen - 1); 
+		wstrSubjectNameTmp.resize (dwLen - 1); // remove ending '\0'
 
 		wstrSubjectName.swap (wstrSubjectNameTmp);
 		bResult = true;

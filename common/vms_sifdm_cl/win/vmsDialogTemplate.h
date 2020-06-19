@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "vmsWinRect.h"
 class vmsDialogTemplate
@@ -15,7 +11,7 @@ public:
 
 		ptempl->style = DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU;
 
-		ptempl->cdit = 0;         
+		ptempl->cdit = 0;         // Number of controls
 
 		ptempl->x = (short)rect.left;  
 		ptempl->y = (short)rect.top;
@@ -24,8 +20,8 @@ public:
 
 		LPWORD pw = reinterpret_cast <LPWORD> (ptempl + 1);
 		assert (pw == ptr_align (pw, 2));
-		*pw++ = 0;             
-		*pw++ = 0;             
+		*pw++ = 0;             // No menu
+		*pw++ = 0;             // Predefined dialog box class (by default)
 
 		if (!title.empty ())
 		{
@@ -35,7 +31,7 @@ public:
 		*pw++ = 0;
 
 		ptempl->style |= DS_SETFONT;
-		*pw++ = 8; 
+		*pw++ = 8; // font size
 		const std::wstring font_title = L"MS Shell Dlg";
 		memcpy (pw, &font_title.front (), font_title.size () * sizeof (wchar_t));
 		pw += font_title.size ();
@@ -71,11 +67,11 @@ public:
 		}
 		*pw++ = 0;
 		
-		*pw++ = 0;             
+		*pw++ = 0;             // No creation data
 
 		m_current_position = ptr_align (pw);
 
-		static_cast <LPDLGTEMPLATEW> (*this)->cdit++; 
+		static_cast <LPDLGTEMPLATEW> (*this)->cdit++; // number of controls
 	}
 
 	operator LPDLGTEMPLATEW () {
@@ -123,7 +119,7 @@ protected:
 			return 0x0085;
 
 		case check_box:
-			return 0x0080; 
+			return 0x0080; // it's a button
 
 		default:
 			assert (!"implemented");

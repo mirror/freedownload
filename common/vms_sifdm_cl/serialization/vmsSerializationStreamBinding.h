@@ -1,8 +1,6 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
+
+// interfaces which are used to bind serialization stream with a target stream (file / memory buffer / etc.)
 
 class vmsSerializationInputStreamBinding
 {
@@ -17,7 +15,7 @@ public:
 
 	}
 
-	
+	// NULL to unbind from stream
 	virtual bool BindToStream (std::shared_ptr <std::istream> spStream)
 	{
 		m_spBoundStream = spStream;
@@ -27,6 +25,7 @@ public:
 protected:
 	std::shared_ptr <std::istream> m_spBoundStream;
 };
+
 
 class vmsSerializationOutputStreamBinding
 {
@@ -48,7 +47,7 @@ public:
 		return true;
 	}
 
-	
+	// flush all data from serialization stream to bound stream
 	virtual bool Flush ()
 	{
 		m_bFlushedToBoundStream = true;

@@ -1,10 +1,8 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "vmsLockable.h"
 #include "win/vmsWinCriticalSection.h"
+
+// todo: move all classes from vmsThreadSafe to this vmsThreadSafe2 and remove "2" from its name then.
 
 class vmsThreadSafe2 : public vmsLockable
 {

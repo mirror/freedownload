@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #ifndef tstring
@@ -14,7 +10,7 @@
 #define tstring std::string
 #endif
 
-#endif 
+#endif // tstring
 
 #ifndef tstringstream
 
@@ -26,13 +22,17 @@
 #define tstringstream std::stringstream
 #endif
 
-#endif 
+#endif // tstring
 
+//////////////////////////////////////////////////////////////////////////
+// xstring
+// xstring is a string with UNICODE support 
+// xstring is a cross platform type
 #ifdef WIN32
 using xstring = std::wstring;
 using xstringstream = std::wstringstream;
 #else
-using xstring = std::string; 
+using xstring = std::string; // unix uses utf-8 ? 
 using xstringstream = std::stringstream;
 #endif
-
+//////////////////////////////////////////////////////////////////////////

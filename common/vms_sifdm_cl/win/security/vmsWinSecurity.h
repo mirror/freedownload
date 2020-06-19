@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <atlsecurity.h>
 #include "../../vmsWinOsVersion.h"
@@ -25,7 +21,9 @@ public:
 		if (!processToken.GetProcessToken (TOKEN_ADJUST_PRIVILEGES))
 			return false;
 
-		
+		/* ATL can't be used here due to its bug. So use Win API calls.
+		if (!processToken.EnablePrivilege (SE_INCREASE_QUOTA_NAME))
+			return false;*/
 		TOKEN_PRIVILEGES tkp;
 		tkp.PrivilegeCount = 1;
 		LookupPrivilegeValue (NULL, SE_INCREASE_QUOTA_NAME, &tkp.Privileges[0].Luid);
@@ -33,10 +31,10 @@ public:
 		if (!AdjustTokenPrivileges (processToken.GetHandle (), FALSE, &tkp, 0, NULL, NULL))
 			return false;
 
-		
-		
-		
-		
+		// Get an HWND representing the desktop shell.
+		// CAVEATS:  This will fail if the shell is not running (crashed or terminated), or the default shell has been
+		// replaced with a custom shell.  This also won't return what you probably want if Explorer has been terminated and
+		// restarted elevated.
 		HWND hwndDesktop = GetShellWindow ();
 		if (!hwndDesktop)
 			return false;

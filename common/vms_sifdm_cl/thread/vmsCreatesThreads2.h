@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 class vmsCreatesThreads2
 {
@@ -11,7 +7,7 @@ public:
 
 	virtual ~vmsCreatesThreads2 ()
 	{
-		
+		// derived class must call Shutdown and WaitThreadsForShutdown in its destructor to terminate all the threads
 		assert (m_threads.empty ());
 	}
 
@@ -52,7 +48,7 @@ public:
 	}
 
 protected:
-	
+	// must be called by derived class each time a thread was created
  	void on_thread_created (std::shared_ptr <std::thread> thread)
 	{
 		assert (thread && thread->joinable ());
@@ -62,7 +58,7 @@ protected:
 		m_threads.push_back (thread);
 	}
 
-	
+	// can be called by a thread
 	void on_thread_terminating ()
 	{
 		auto this_id = std::this_thread::get_id ();
@@ -86,7 +82,7 @@ protected:
 		return thread;
 	}
 
-	
+	// returns true in case Shutdown event occurred
 	bool wait_for_shutdown (unsigned uMilliseconds)
 	{
 		std::unique_lock <std::mutex> lock (m_threads_mx);

@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include "vmsSerializer.h"
@@ -69,7 +65,7 @@ public:
 		return vmsSerializer::Serialize (spObject.get (), it->second.spSerializationStore.get (), it->second.spSerializationOutputFormatter.get ());
 	}
 
-	
+	// skipObjectsWithFlags : ObjectSerializationData::Flags
 	bool SaveAllObjects (bool bCheckIfDirty = false, unsigned skipObjectsWithFlags = 0)
 	{
 		vmsTHREAD_SAFE_SCOPE;
@@ -117,7 +113,7 @@ public:
 protected:
 	std::map <vmsSerializable::tSP, ObjectSerializationData> m_mObjects;
 	vmsWinHandle::tSP m_spThreadAutosave;
-	unsigned m_uAutosaveIntervalMs; 
+	unsigned m_uAutosaveIntervalMs; // interval in milliseconds
 
 	static unsigned __stdcall _threadAutosave(vmsCreatesThreads *pthis2)
 	{
@@ -126,7 +122,7 @@ protected:
 		while (!pthis->WaitForShutdownEvent (pthis->m_uAutosaveIntervalMs))
 			pthis->SaveAllObjects (true, ObjectSerializationData::DisableAutosave);
 
-		
+		// need to save again because objects may have changed after the last autosave
 		pthis->SaveAllObjects(true, ObjectSerializationData::DisableAutosave);
 		return 0;
 	}

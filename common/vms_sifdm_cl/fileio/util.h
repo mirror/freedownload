@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <shellapi.h>
 
@@ -17,6 +13,7 @@ inline void vmsGetPath (LPCTSTR pszFile, LPTSTR pszPath)
 	pszPath [len+1] = 0;
 }
 
+
 template <typename T>
 T vmsFileNameFromPath (const T& path)
 {
@@ -28,29 +25,30 @@ T vmsFileNameFromPath (const T& path)
 	return T (path.begin () + pos + 1, path.end ());
 }
 
+
 inline BOOL vmsBuildPath (LPCTSTR pszPath)
 {
 	int len = (int)_tcslen (pszPath);
 	int start = 0;
 
-	
+	// UNC path? (\\server\disk\path...)
 	if (pszPath [0] == '\\' && pszPath [1] == '\\')
 	{
-		
+		// skip server part
 		LPCTSTR psz = _tcschr (pszPath + 2, '\\');
-		
+		// skip disk part
 		if (psz)
 			psz = _tcschr (psz+1, '\\');
 		if (psz)
 			psz++;
 		if (psz == NULL)
 		{
-			
+			// invalid path
 			SetLastError (ERROR_PATH_NOT_FOUND);
 			return FALSE;
 		}
-		
-		
+		// start calling CreateDirectory from this position
+		// (position of path part)
 		start = (int)(psz - pszPath);
 	}
 	else
@@ -63,19 +61,19 @@ inline BOOL vmsBuildPath (LPCTSTR pszPath)
 	{
 		if (pszPath [i] == '\\' || pszPath [i] == '/')
 		{
-			
-			
-			
-			
-			
-			
+			// for (root directory, subdirectory, subdirectory of subdirectory,...)
+			// e.g. for c:\windows\system32\cache
+			// it will be:
+			// CreateDirectory (c:\windows)
+			// CreateDirectory (c:\windows\system32)
+			// CreateDirectory (c:\windows\system32\cache)
 
 			TCHAR szPath2 [MAX_PATH];
 
 			CopyMemory (szPath2, pszPath, i * sizeof (TCHAR));
 			szPath2 [i] = 0;
 
-			if (FALSE == CreateDirectory (szPath2, NULL))	
+			if (FALSE == CreateDirectory (szPath2, NULL))	// create it
 			{
 				if (GetLastError () != ERROR_ALREADY_EXISTS)
 					return FALSE;
@@ -95,6 +93,7 @@ inline BOOL vmsBuildPath (LPCTSTR pszPath)
 	return TRUE;
 }
 
+
 inline BOOL vmsBuildPathToFile (LPCTSTR pszFileName)
 {
 	TCHAR szPath [MAX_PATH];
@@ -102,11 +101,13 @@ inline BOOL vmsBuildPathToFile (LPCTSTR pszFileName)
 	return vmsBuildPath (szPath);
 }
 
-inline void vmsTrimPath( std::wstring& wstrPath)
+
+inline void vmsTrimPath(/* out */ std::wstring& wstrPath)
 {
 	while (!wstrPath.empty() && (wstrPath.back() == L'\\' || wstrPath.back() == L'/'))
 		wstrPath.erase(wstrPath.end() - 1);
 }
+
 
 inline std::wstring vmsAppendPath(const std::wstring& wstrPathFirst, const std::wstring& wstrPathSecond)
 {
@@ -121,11 +122,14 @@ inline std::wstring vmsAppendPath(const std::wstring& wstrPathFirst, const std::
 	return ret;
 }
 
+
+// returns true for existing folder too
 inline bool vmsFileExists(const std::wstring& wstrFile)
 {
 	DWORD dwAttr = GetFileAttributes(wstrFile.c_str());
 	return (dwAttr != INVALID_FILE_ATTRIBUTES);
 }
+
 
 inline bool vmsIsFolder(const std::wstring& wstrFolder)
 {
@@ -133,10 +137,12 @@ inline bool vmsIsFolder(const std::wstring& wstrFolder)
 	return (dwAttr != INVALID_FILE_ATTRIBUTES && (dwAttr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+
 inline bool vmsRemoveFile (const std::wstring& wstrFile)
 {
 	return !_wremove (wstrFile.c_str ());
 }
+
 
 inline bool vmsCheckDirectoryWriteAccess (const std::wstring& path)
 {
@@ -193,6 +199,7 @@ inline BOOL vmsMoveDirectoryWithContents(const std::wstring &pathFrom, const std
 	return (SHFileOperation(&sh) == 0);
 }
 
+
 inline std::wstring vmsGenerateUniqueFileName(
 	const std::wstring &wstrFileName, 
 	const std::wstring &wstrAddExtension = L"")
@@ -222,6 +229,7 @@ inline std::wstring vmsGenerateUniqueFileName(
 	return (wstr + wstrExt);
 }
 
+
 inline tstring vmsGetTempPath ()
 {
 	TCHAR path [MAX_PATH] = _T ("");
@@ -229,6 +237,7 @@ inline tstring vmsGetTempPath ()
 	assert (*path);
 	return path;
 }
+
 
 inline tstring vmsGetFileSystemName (const tstring& rootPathName)
 {
@@ -240,6 +249,7 @@ inline tstring vmsGetFileSystemName (const tstring& rootPathName)
 	}
 	return fs;
 }
+
 
 inline uint64_t vmsGetMaximumFileSize (const tstring &fileSystemName)
 {
@@ -255,7 +265,7 @@ inline uint64_t vmsGetMaximumFileSize (const tstring &fileSystemName)
 	if (fileSystemName == _T("NTFS"))
 		return (256ULL*1024*1024*1024*1024 - 64*1024);
 
-	return 0; 
+	return 0; // unknown
 }
 
 inline uint64_t vmsGetMaximumFileSizeForFolder(const tstring &path)

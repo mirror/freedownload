@@ -1,9 +1,6 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
-
+// some tasks can be done in a specific thread only
+// e.g. Windows UI controls can be manipulated only from the thread created them
 class PerformsTasksInUiThread
 {
 public:

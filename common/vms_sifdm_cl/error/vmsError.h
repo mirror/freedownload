@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <system_error>
 #include "../stringh.h"
@@ -52,6 +48,7 @@ public:
 		return normalizer.normalized (error);
 	}
 };
+
 
 class vmsErrorSerializer : public vmsSerializable
 {

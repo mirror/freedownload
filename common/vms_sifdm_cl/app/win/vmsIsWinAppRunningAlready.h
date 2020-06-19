@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "../vmsIsAppRunningAlready.h"
 class vmsIsWinAppRunningAlready : public vmsIsAppRunningAlreadyBase
@@ -15,7 +11,7 @@ public:
 
 	virtual bool isAnotherInstanceRunning ()
 	{
-		assert (!m_spAppMutex); 
+		assert (!m_spAppMutex); // this must be called before call to inidicateMeRunning ()
 		HANDLE h = OpenMutex (SYNCHRONIZE, FALSE, m_wstrAppName.c_str ());
 		if (h)
 			CloseHandle (h);

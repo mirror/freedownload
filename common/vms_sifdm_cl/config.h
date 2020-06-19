@@ -1,8 +1,9 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
+
+// define to import implementation from a common DLL module
+//#define VMSCL_IMPL_IMPORT
+// define in common DLL module (if any)
+//#define VMSCL_IMPL_EXPORT
 
 #ifndef VMSCL_IMPL_IMPORT
 
@@ -12,4 +13,4 @@
 	#define VMSCL_EXPORTABLE
 #endif
 
-#endif 
+#endif // VMSCL_IMPL_IMPORT

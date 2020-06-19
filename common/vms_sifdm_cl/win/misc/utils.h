@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "../../../vms_sifdm_cl/win/vmsWinRect.h"
 #include "../vmsProcessList.h"
@@ -11,10 +7,10 @@ inline bool vmsIsBrowserRunning (bool *pbIsForeground)
 	*pbIsForeground = false;
 
 	LPCTSTR pptszBrowserWndClasses [] = {
-		_T ("IEFrame"), 
-		_T ("MozillaUIWindowClass"), 
-		_T ("OpWindow"), 
-		_T ("Chrome_WidgetWin_0"),  
+		_T ("IEFrame"), // Internet Explorer
+		_T ("MozillaUIWindowClass"), // Firefox
+		_T ("OpWindow"), // Opera
+		_T ("Chrome_WidgetWin_0"),  // Chrome
 	};
 
 	bool bRunning = false;
@@ -26,7 +22,7 @@ inline bool vmsIsBrowserRunning (bool *pbIsForeground)
 		HWND hwnd = NULL;
 		while (hwnd = FindWindowEx (NULL, hwnd, pptszBrowserWndClasses [i], NULL))
 		{
-			bRunning = true; 
+			bRunning = true; // found browser window
 			if (hwndActive == hwnd)
 			{
 				*pbIsForeground = true;
@@ -62,7 +58,7 @@ inline bool vmsIsBrowserRunning (bool *pbIsForeground)
 		}
 		else
 		{
-			
+			// look for default browser's process
 			CRegKey key; 
 			if (ERROR_SUCCESS == key.Open (HKEY_CLASSES_ROOT, _T ("http\\shell\\open\\command"), KEY_READ))
 			{
@@ -99,6 +95,7 @@ inline bool vmsIsBrowserRunning (bool *pbIsForeground)
 	return false;
 }
 
+
 inline bool vmsIsInFullScreenMode ()
 {
 	HWND hwnd = GetForegroundWindow ();
@@ -115,6 +112,7 @@ inline bool vmsIsInFullScreenMode ()
 	}
 	return false;
 }
+
 
 inline void vmsShowMainWindow (HWND hwnd)
 {
@@ -133,12 +131,13 @@ inline void vmsShowMainWindow (HWND hwnd)
 		}
 		else
 		{
-			
+			//assert ("unexpected error" &&0);
 			ShowWindow (hwnd, SW_SHOW);
 		}
 	}
 	SetForegroundWindow (hwnd);
 }
+
 
 inline void vmsShowHideMainWindow (HWND hwnd)
 {
@@ -148,9 +147,10 @@ inline void vmsShowHideMainWindow (HWND hwnd)
 		ShowWindow (hwnd, SW_HIDE);
 }
 
+
 inline void vmsShowHideMainWindow2 (HWND hwnd)
 {
-	
+	//static std::ofstream file ("c:\\work\\test_p.txt", std::ios_base::trunc);
 
 	RECT rcWnd;
 	GetWindowRect (hwnd, &rcWnd);
@@ -172,7 +172,21 @@ inline void vmsShowHideMainWindow2 (HWND hwnd)
 		RECT rc;
 		if (IntersectRect (&rc, &rcWnd, &rcWndPrev))
 		{
-			
+			/*{
+				file << "intersects with " << wndPrev << std::endl;
+				WCHAR title [1000];
+				GetWindowText (wndPrev, title, 1000);
+				file << "title: " << utf8FromWide (title) << std::endl;
+				GetClassName (wndPrev, title, 1000);
+				file << "class: " << utf8FromWide (title) << std::endl;
+				DWORD process_id = 0;
+				GetWindowThreadProcessId (wndPrev, &process_id);
+				file << "pid: " << process_id << std::endl;
+				file << "rect: (" << rcWndPrev.left << ',' << rcWndPrev.top << ',' << rcWndPrev.right << ',' << rcWndPrev.bottom << ")" << std::endl;
+				file << "my_rect: (" << rcWnd.left << ',' << rcWnd.top << ',' << rcWnd.right << ',' << rcWnd.bottom << ")" << std::endl;
+				file << "my_pid: " << GetCurrentProcessId () << std::endl;
+				file << std::endl;
+			}*/
 			vmsShowMainWindow (hwnd);
 			return;
 		}
@@ -181,6 +195,8 @@ inline void vmsShowHideMainWindow2 (HWND hwnd)
 	vmsShowHideMainWindow (hwnd);
 }
 
+
+// open file or folder
 inline void vmsOpenInWindowsExplorer (const std::wstring& wstrPath)
 {
 	assert (!wstrPath.empty ());

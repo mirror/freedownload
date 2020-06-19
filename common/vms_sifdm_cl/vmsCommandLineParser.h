@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include "tstring.h"
@@ -9,9 +5,9 @@
 class vmsCommandLineParser
 {
 public:
-	
-	
-	
+	// first element of a pair is parameter
+	// the second one is its value
+	// (e.g. -string="test" --> "string", "test")
 	typedef std::pair <tstring, tstring> Argument;
 	typedef std::vector <Argument> tArguments;
 public:
@@ -44,7 +40,7 @@ public:
 			
 			bool bHasValue = true;
 
-			
+			// skip spaces and CLRFs
 			while (*ptszCmdLine && (*ptszCmdLine == ' ' || *ptszCmdLine == '\r' || *ptszCmdLine == '\n'))
 				ptszCmdLine++;
 
@@ -56,7 +52,7 @@ public:
 				while (*ptszCmdLine == ' ')
 					ptszCmdLine++;
 
-				
+				// param=value ?
 				if (*ptszCmdLine == '=')
 				{
 					ptszCmdLine++;
@@ -69,9 +65,9 @@ public:
 
 			if (bHasValue)
 			{
-				TCHAR cSp = ' ';	
+				TCHAR cSp = ' ';	// character that accomplishes parameter
 				TCHAR cSp1 = '\n', cSp2 = '\r';
-				
+				// parameter is quoted ("parameter") or apostrophed ('parameter')?
 				if (*ptszCmdLine == '"' || *ptszCmdLine == '\'')
 				{
 					cSp = *ptszCmdLine++;
@@ -107,7 +103,7 @@ public:
 		}
 		return NULL;
 	}
-	
+	// case independent (CI) version
 	tArguments::const_iterator findArgumentCI (LPCTSTR ptszName) const
 	{
 		for (tArguments::const_iterator it = m_vArgs.cbegin (); it != m_vArgs.cend (); ++it)

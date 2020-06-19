@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include "vmsInternetProxyInfo.h"
@@ -108,6 +104,7 @@ protected:
 	std::shared_ptr <vmsOperationSpeedLimitManager> m_downloadSpeedLimit;
 	std::shared_ptr <vmsOperationSpeedLimitManager> m_uploadSpeedLimit;
 };
+
 
 class vmsInternetOperationInitializationDataReceiver
 {

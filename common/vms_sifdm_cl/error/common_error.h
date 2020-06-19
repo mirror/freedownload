@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include "../config.h"
@@ -33,7 +29,7 @@ public:
 		switch (ev)
 		{
 		case unexpected:
-			return std::errc::owner_dead; 
+			return std::errc::owner_dead; // just for example ;)
 
 		default:
 			return std::error_condition (ev, *this);
@@ -63,7 +59,7 @@ inline std::error_condition make_error_condition (common_error e)
 		static_cast <int> (e), category ());
 }
 
-} 
+} // namespace common_error
 
 namespace std
 {

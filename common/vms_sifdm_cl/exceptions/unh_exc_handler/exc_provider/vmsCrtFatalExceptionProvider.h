@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <csignal>
 #include "vmsFatalExceptionProviderImpl.h"
@@ -65,7 +61,7 @@ protected:
 		}
 		else
 		{
-			make_sure (0); 
+			make_sure (0); // crash the app
 		}
 	}
 };

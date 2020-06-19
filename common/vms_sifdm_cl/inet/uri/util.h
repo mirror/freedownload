@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 inline std::wstring fileNameFromHttpUrl (const std::wstring& wstrUrl)
@@ -28,6 +24,7 @@ inline std::wstring fileNameFromHttpUrl (const std::wstring& wstrUrl)
 	return std::wstring (wstrUrl.begin () + nPos1 + 1, wstrUrl.begin () + nPos2);
 }
 
+
 inline std::wstring urlPathFromHttpUrl (const std::wstring& wstrUrl)
 {
 	assert (!wstrUrl.empty ());
@@ -52,6 +49,7 @@ inline std::wstring urlPathFromHttpUrl (const std::wstring& wstrUrl)
 
 	return std::wstring (wstrUrl.begin (), wstrUrl.begin () + nPos1 + 1);
 }
+
 
 inline std::wstring domainFromHttpUrl (const std::wstring& wstrUrl)
 {

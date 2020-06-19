@@ -1,8 +1,7 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
+
+// note: the better name here is maybe "Formatter", not "Stream"
+// i.e. vmsSerializationInputFormatter instead of vmsSerializationInputStream
 
 class vmsSerializationInputStream
 {
@@ -11,10 +10,10 @@ public:
 public:
 	virtual tSP SelectNode (LPCWSTR pwszName)	 = NULL;
 	virtual std::vector <tSP> SelectNodes (const std::wstring& wstrName) = NULL;
-	
+	// read value in current node
 	virtual bool ReadValue (LPCWSTR pwszName, std::wstring& val, bool bAttribute = true) = NULL;
 	
-	
+	// read value saved as string
 	template <class TValue>
 	bool ReadValueS (LPCWSTR pwszName, TValue& val, bool bAttribute = true)
 	{
@@ -27,7 +26,7 @@ public:
 		return !wss.fail ();
 	}
 
-	
+	// clear the stream contents so it can be used to serialize another object
 	virtual void clear () 
 	{
 
@@ -40,10 +39,10 @@ public:
 	typedef std::shared_ptr <vmsSerializationOutputStream> tSP;
 public:
 	virtual tSP CreateNode (LPCWSTR pwszName) = NULL;
-	
+	// save value under current node
 	virtual bool WriteValue (LPCWSTR pwszName, const std::wstring& val, bool bAttribute = true) = NULL;
 	
-	
+	// write value as string
 	template <class TValue>
 	bool WriteValueS (LPCWSTR pwszName, const TValue& val, bool bAttribute = true)
 	{
@@ -54,7 +53,7 @@ public:
 		return WriteValue (pwszName, wss.str (), bAttribute);
 	}
 
-	
+	// clear the stream contents so it can be used to serialize another object
 	virtual void clear () 
 	{
 
@@ -121,7 +120,7 @@ public:
 		return vResult;
 	}
 
-	
+	// serialize value under current node
 	bool SerializeValue (LPCWSTR pwszName, std::wstring& val, bool bAttribute = true)
 	{
 		if (m_pIS)
@@ -130,7 +129,7 @@ public:
 			return m_pOS->WriteValue (pwszName, val, bAttribute);
 	}
 
-	
+	// serialize value as a string
 	template <class TValue>
 	bool SerializeValueS (LPCWSTR pwszName, TValue& val, bool bFailOnReadFail = true, bool bAttribute = true)
 	{
@@ -140,7 +139,7 @@ public:
 			return m_pOS->WriteValueS (pwszName, val, bAttribute);
 	}
 
-	
+	// clear the stream contents so it can be used to serialize another object
 	void clear () 
 	{
 		if (m_pIS)

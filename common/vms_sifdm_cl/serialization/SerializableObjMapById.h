@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "SerializableObjMap.h"
 template <typename TObj, typename TKey = uint32_t>
@@ -44,7 +40,7 @@ protected:
 	}
 
 protected:
-	
+	// object must be locked
 	virtual bool remove_item_ (TKey id)
 	{
 		auto it = m_items.find (id);

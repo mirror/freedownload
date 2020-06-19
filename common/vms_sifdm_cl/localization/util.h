@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 enum text_file_encoding
@@ -11,6 +7,7 @@ enum text_file_encoding
 	tfe_utf16,
 	tfe_utf16le
 };
+
 
 inline bool get_text_encoding (const unsigned char* buffer, size_t buffer_size, text_file_encoding& result)
 {
@@ -28,6 +25,7 @@ inline bool get_text_encoding (const unsigned char* buffer, size_t buffer_size, 
 
 	return true;
 }
+
 
 inline bool get_text_file_encoding (const tstring& name, text_file_encoding& result)
 {
@@ -47,6 +45,7 @@ inline bool get_text_file_encoding (const tstring& name, text_file_encoding& res
 
 	return get_text_encoding (abc, dw, result);
 }
+
 
 inline FILE* open_text_file (const tstring& name)
 {

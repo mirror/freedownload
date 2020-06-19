@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 template <class T>
 class vmsSerializableObjVector :
@@ -20,7 +16,7 @@ public:
 		setDirty ();
 	}
 
-	
+	// not a threadsafe function
 	void remove_item (typename container_t::iterator it)
 	{
 		m_items.erase (it);
@@ -38,12 +34,12 @@ protected:
 	container_t m_items;
 
 protected:
-	
-	
+	// pStm can be used to identify the type of object
+	// no serialization must be done here
 	virtual T create_obj (vmsSerializationIoStream *pStm) = 0;
 
 public:
-	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags ) override
+	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags /* = 0 */) override
 	{
 		vmsLockableScope;
 
@@ -82,6 +78,7 @@ protected:
 	}
 };
 
+
 template <class T>
 class vmsSerializableUniqueObjVector :
 	public vmsSerializableObjVector <std::unique_ptr <T>>
@@ -92,6 +89,7 @@ public:
 		return std::make_unique <T> ();
 	}
 };
+
 
 template <class T>
 class vmsSerializableSharedObjVector :

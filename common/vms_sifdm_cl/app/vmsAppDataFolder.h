@@ -1,14 +1,10 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 class vmsAppDataFolderBase
 {
 public:
-	
-	
+	// wstrCompanyName can be empty
+	// are you sure it's required to be empty? :)
 	vmsAppDataFolderBase (const std::wstring& wstrCompanyName, const std::wstring& wstrAppName) : 
 		m_wstrAppName (wstrAppName),
 		m_wstrCompanyName (wstrCompanyName)
@@ -27,6 +23,7 @@ protected:
 	std::wstring m_wstrAppName;
 	std::wstring m_wstrCompanyName;
 };
+
 
 #ifdef _WIN32
 #include "win/vmsWinAppDataFolder.h"

@@ -1,14 +1,13 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
+
+// helper class for work with HTTP buffer (containing header, body or both)
+// warning: this class may generate exceptions (as integers)
 
 class vmsHttpBuffer
 {
 private:
-	
-	
+	// do not copy buffer objects
+	// use SavePosition/RestorePosition instead
 	vmsHttpBuffer (const vmsHttpBuffer&);
 	const vmsHttpBuffer& operator= (const vmsHttpBuffer&);
 public:
@@ -70,6 +69,7 @@ protected:
 	ThrowReason m_enDefaultThrowReason, m_enThrowReason;
 };
 
+// one more helper class to help manage state of vmsHttpBuffer object
 class vmsHttpBufferStateAutoSaveAndRestore
 {
 public:
@@ -102,7 +102,7 @@ protected:
 	vmsHttpBuffer *m_pBuff;
 	vmsHttpBuffer::Position m_pos;
 	vmsHttpBuffer::ThrowReason m_enTR;
-	DWORD m_dwWhat; 
+	DWORD m_dwWhat; // ORed StateItems
 };
 
 #define HttpTspecials "()<>@,;:\\\"/[]?={} \t"
@@ -183,7 +183,7 @@ public:
 		while (buff.getByte (true) != '"' && isTEXT (buff, &nLen2))
 		{
 			if (nLen2 == 1 && buff.getByte (true) == '\\')
-				nLen2++; 
+				nLen2++; // this is: quoted-pair = "\" CHAR
 			nLen += nLen2;
 			buff.SkeepBytes (nLen2);
 			nLen2 = 0;
@@ -199,12 +199,12 @@ public:
 		assert (str.length () >= 2);
 		if (str.length () < 2)
 			return buff.Throw (buff.ParseError);
-		
+		// remove ""
 		str.erase (0, 1);
 		str.erase (str.length () - 1, 1);
 		if (str.empty ())
 			return;
-		
+		// remove \x
 		size_t nPos = 0;
 		while (nPos < str.length () && 
 					(nPos = str.find ('\\', nPos)) != std::string::npos)
@@ -222,7 +222,7 @@ public:
 		return *pnLen != 0;
 	}
 	static void ExtractToken (vmsHttpBuffer& buff, std::string& str) {ExtractField (buff, isToken, str);}
-	
+	// HTTP-Version   = "HTTP" "/" 1*DIGIT "." 1*DIGIT
 	static bool isHttpVersion (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		*pnLen = 0;
@@ -252,11 +252,13 @@ public:
 	static void ExtractHttpVersion (vmsHttpBuffer& buff, std::string& str) {ExtractField (buff, isHttpVersion, str);}
 };
 
+// HTTP header field parser
+
 class vmsHttpGenericHeaderField
 {
 public:
-	
-	
+	// message-header = field-name ":" [ field-value ] CRLF
+	// field-name     = token
 	void ReadFromBuffer (vmsHttpBuffer& buff)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff, vmsHttpBufferStateAutoSaveAndRestore::DefaultThrowReason);
@@ -292,17 +294,17 @@ public:
 	}
 
 public:
-	
-	
-	
-	
+	// field-value    = *( field-content | LWS )
+	// field-content  = <the OCTETs making up the field-value
+	//   and consisting of either *TEXT or combinations
+	//	 of token, tspecials, and quoted-string>
 	static bool isFieldValue (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
 		buff.setDefaultThrowReason (vmsHttpBuffer::NeedMoreData);
 		*pnLen = 0;
 		size_t nLen = 0;
-		size_t nLenAdded = 1; 
+		size_t nLenAdded = 1; // for 1st case check to pass
 		while (!buff.isEndOfBufferReached () && nLenAdded)
 		{
 			nLenAdded = 0;
@@ -346,8 +348,8 @@ public:
 				strResult += b;
 				continue;
 			}
-			
-			
+			// ok, it's a space
+			// add space only if required
 			if (!strResult.empty () && strResult [strResult.length () - 1] != ' ')
 				strResult += ' ';
 		}
@@ -402,7 +404,7 @@ public:
 			m_vFields.push_back (hdrf);
 		}
 		
-		
+		// remove CRLF
 		buff.getByte ();
 		buff.getByte ();
 	}
@@ -428,15 +430,17 @@ public:
 	virtual ~vmsHttpHeaderParser () {}
 
 protected:
-	virtual void ReadHeaderFirstLine (vmsHttpBuffer& buff) = NULL; 
+	virtual void ReadHeaderFirstLine (vmsHttpBuffer& buff) = NULL; // different for requests and responses
 	virtual void toStringFirstLine (std::string& str) const = NULL;
 	std::vector <vmsHttpGenericHeaderField> m_vFields;
 };
 
+// HTTP URI
+
 class vmsHttpURI
 {
 public:
-	
+	// URI = ( absoluteURI | relativeURI ) [ "#" fragment ]
 	static bool isURI (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -462,7 +466,7 @@ public:
 
 	static void ExtractURI (vmsHttpBuffer& buff, std::string& str) {vmsHttpBufferElements::ExtractField (buff, isURI, str);}
 
-	
+	// absoluteURI = scheme ":" *( uchar | reserved )
 	static bool isAbsoluteURI (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -483,13 +487,13 @@ public:
 		return true;
 	}
 
-	
+	// relativeURI    = net_path | abs_path | rel_path
 	static bool isRelativeURI (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		return isNetPath (buff, pnLen) || isAbsPath (buff, pnLen) || isRelPath (buff, pnLen);
 	}
 
-	
+	// *( uchar | reserved )
 	static bool isAsteriskUcharOrReserved (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -522,7 +526,7 @@ public:
 		return isAsteriskUcharOrReserved (buff, pnLen);
 	}
 
-	
+	// scheme         = 1*( ALPHA | DIGIT | "+" | "-" | "." )
 	static bool isScheme (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -539,7 +543,7 @@ public:
 		return *pnLen != 0;
 	}
 
-	
+	// net_path       = "//" net_loc [ abs_path ]
 	static bool isNetPath (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -559,7 +563,7 @@ public:
 		return true;
 	}
 
-	
+	// net_loc        = *( pchar | ";" | "?" )
 	static bool isNetLoc (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -585,7 +589,7 @@ public:
 		return true;
 	}
 
-	
+	// abs_path = "/" rel_path
 	static bool isAbsPath (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -599,7 +603,7 @@ public:
 		return true;
 	}
 
-	
+	// rel_path = [ path ] [ ";" params ] [ "?" query ]
 	static bool isRelPath (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		*pnLen = 0;
@@ -625,7 +629,7 @@ public:
 		return true;
 	}
 
-	
+	// path           = fsegment *( "/" segment )
 	static bool isPath (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -650,7 +654,7 @@ public:
 		return true;
 	}
 
-	
+	// fsegment       = 1*pchar
 	static bool isFsegment (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		if (!isPchar (buff, pnLen))
@@ -667,7 +671,7 @@ public:
 		return true;
 	}
 
-	
+	// segment        = *pchar
 	static bool isSegment (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		*pnLen = 0;
@@ -684,7 +688,7 @@ public:
 		return true;
 	}
 
-	
+	// uchar = unreserved | escape
 	static bool isUchar (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		if (isUnreserved (buff.getByte (true)))
@@ -695,7 +699,7 @@ public:
 		return isEscape (buff, pnLen);
 	}
 
-	
+	// unreserved     = ALPHA | DIGIT | safe | extra | national
 	static bool isUnreserved (BYTE b)
 	{
 		return isalpha ((char)b) || isdigit ((char)b) || isSafe (b) || isExtra (b) || isNational (b);
@@ -726,7 +730,7 @@ public:
 		return b == ';' || b == '/' || b == '?' || b == ':' || b == '@' || b == '&' || b == '=' || b == '+';
 	}
 
-	
+	// escape = "%" HEX HEX
 	static bool isEscape (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		*pnLen = 0;
@@ -740,7 +744,7 @@ public:
 		return *pnLen != 0;
 	}
 
-	
+	// pchar          = uchar | ":" | "@" | "&" | "=" | "+"
 	static bool isPchar (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		BYTE b = buff.getByte (true);
@@ -752,7 +756,7 @@ public:
 		return isUchar (buff, pnLen);
 	}
 
-	
+	// query          = *( uchar | reserved )
 	static bool isQuery (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -780,7 +784,7 @@ public:
 		return true;
 	}
 
-	
+	// params = param *( ";" param )
 	static bool isParams (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		if (!isParam (buff, pnLen))
@@ -801,7 +805,7 @@ public:
 		return true;
 	}
 
-	
+	// param          = *( pchar | "/" )
 	static bool isParam (vmsHttpBuffer& buff, size_t *pnLen)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);
@@ -827,6 +831,9 @@ public:
 	}
 };
 
+
+// HTTP request parser
+
 class vmsHttpRequestParser : public vmsHttpHeaderParser  
 {
 public:
@@ -835,7 +842,7 @@ public:
 	void setURI (LPCSTR psz) {m_strURI = psz;}
 
 protected:
-	
+	// Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
 	void ReadHeaderFirstLine (vmsHttpBuffer& buff)
 	{
 		m_strMethod = m_strURI = m_strHttpVersion = "";
@@ -874,10 +881,13 @@ protected:
 		str += "\r\n";
 	}
 
-	std::string m_strMethod; 
-	std::string m_strURI; 
+	std::string m_strMethod; // POST, GET, etc.
+	std::string m_strURI; // request path or full url
 	std::string m_strHttpVersion;
 };
+
+
+// HTTP response parser
 
 class vmsHttpResponseParser : public vmsHttpHeaderParser  
 {
@@ -886,7 +896,7 @@ public:
 	const std::string& getResponseResult () const {return m_strResponseResult;}
 
 protected:
-	
+	// Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF
 	void ReadHeaderFirstLine (vmsHttpBuffer& buff)
 	{
 		m_strHttpVersion = m_strResponseResult = "";
@@ -908,7 +918,7 @@ protected:
 			buff.Throw (buff.ParseError);
 	}
 
-	
+	// extension-code = 3DIGIT
 	void ExtractStatusCode (vmsHttpBuffer& buff)
 	{
 		std::string strCode;
@@ -922,7 +932,7 @@ protected:
 		m_nStatusCode = atoi (strCode.c_str ());
 	}
 
-	
+	// *<TEXT, excluding CR, LF>
 	void ExtractReasonPhrase (vmsHttpBuffer& buff)
 	{
 		m_strResponseResult = "";
@@ -955,9 +965,11 @@ protected:
 	}
 
 	std::string m_strHttpVersion;
-	std::string m_strResponseResult; 
+	std::string m_strResponseResult; // NUMBER and TEXT DESCRIPTION
 	UINT m_nStatusCode;
 };
+
+// Content-Range header field
 
 class vmsHttpContentRangeHeaderField
 {
@@ -965,7 +977,14 @@ public:
 	vmsHttpContentRangeHeaderField (const vmsHttpGenericHeaderField *pfield) : 
 		m_uFirstBytePos (0), m_uLastBytePos (0), m_uEntityLength (0)
 	{
-		
+		/*Content-Range = "Content-Range" ":" content-range-spec
+
+		content-range-spec      = byte-content-range-spec
+
+		byte-content-range-spec = bytes-unit SP first-byte-pos "-"
+		last-byte-pos "/" entity-length
+
+		entity-length           = 1*DIGIT*/
 		std::string strValue; pfield->getValueWoExtraSpaces (strValue);
 		LPCSTR psz = strValue.c_str ();
 		while (*psz && !isdigit (*psz))
@@ -991,6 +1010,30 @@ public:
 	UINT64 m_uEntityLength;
 };
 
+// Chunked transfer encoded body parser
+
+/*
+Chunked-Body   = *chunk
+"0" CRLF
+footer
+CRLF
+
+chunk          = chunk-size [ chunk-ext ] CRLF
+chunk-data CRLF
+
+hex-no-zero    = <HEX excluding "0">
+
+chunk-size     = hex-no-zero *HEX
+chunk-ext      = *( ";" chunk-ext-name [ "=" chunk-ext-value ] )
+chunk-ext-name = token
+chunk-ext-val  = token | quoted-string
+chunk-data     = chunk-size(OCTET)
+
+footer         = *entity-header
+*/
+
+// can be used to parse a body starting from any chunk (not only from the very first one)
+
 class vmsHttpChunkedTransferEncoding
 {
 public:
@@ -1003,11 +1046,11 @@ public:
 
 	vmsHttpChunkedTransferEncoding () : m_bZeroChunkReached (false) {}
 
-	
-	
-	
-	
-	
+	//Chunked-Body   = *chunk
+	//                 "0" CRLF
+	//	               footer
+	//	               CRLF
+	// footer        = *entity-header
 	void Read (vmsHttpBuffer &buff)
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff, vmsHttpBufferStateAutoSaveAndRestore::DefaultThrowReason);
@@ -1034,7 +1077,7 @@ public:
 
 		m_bZeroChunkReached = true;
 
-		buff.getByte (); 
+		buff.getByte (); // '0'
 		if (buff.getByte () != '\r' || buff.getByte () != '\n')
 			buff.Throw (buff.ParseError);
 
@@ -1054,11 +1097,12 @@ public:
 	const Chunk& getLastNotCompletelyProcessedChunk () const {return m_lastNotCompletelyProcessedChunk;}
 	bool isZeroChunkReached () const {return m_bZeroChunkReached;}
 
+
 protected:
-	
-	
-	
-	
+	// chunk          = chunk-size [ chunk-ext ] CRLF
+	//                  chunk-data CRLF
+	// chunk-data     = chunk-size(OCTET)
+	// *pChunk will be set to item's content
 	static bool ReadChunk (vmsHttpBuffer &buff, Chunk& item)
 	{
 		std::string str;
@@ -1091,9 +1135,9 @@ protected:
 		return true;
 	}
 
-	
-	
-	
+	// chunk-ext      = *( ";" chunk-ext-name [ "=" chunk-ext-value ] )
+	// chunk-ext-name = token
+	// chunk-ext-val  = token | quoted-string
 	static bool isChunkExt (vmsHttpBuffer& buff, size_t *pnLen) 
 	{
 		vmsHttpBufferStateAutoSaveAndRestore bs (buff);

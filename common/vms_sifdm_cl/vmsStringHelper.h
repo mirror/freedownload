@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 class vmsStringHelper  
@@ -61,7 +57,7 @@ public:
 		return ret;
 	}
 
-	
+	// the same as _tcsstr but case independent
 	static LPCTSTR StrNIStr(LPCTSTR szStringToBeSearched, LPCTSTR szSubstringToSearchFor, int nStringLen = -1)
 	{
 		int            nLen;
@@ -70,17 +66,17 @@ public:
 		LPCTSTR		pPos;
 		int            nStringLenInt;
 
-		
+		// verify parameters
 		if ( szStringToBeSearched == NULL ||
 			szSubstringToSearchFor == NULL )
 		{
 			return szStringToBeSearched;
 		}
 
-		
+		// get length of the substring
 		nLen = (int)_tcslen(szSubstringToSearchFor);
 
-		
+		// empty substring-return input (consistent w/ strstr)
 		if ( nLen == 0 ) {
 			return szStringToBeSearched;
 		}
@@ -102,8 +98,8 @@ public:
 			if ( _tcsnicmp(pPos, szSubstringToSearchFor, nLen) == 0 ) {
 				return pPos;
 			}
-			
-			pPos++; 
+			// move on to the next character
+			pPos++; //_tcsinc was causing problems :(
 		}
 
 		return NULL;

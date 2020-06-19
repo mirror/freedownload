@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 class vmsInternetProxyInfo : public vmsSerializableTs
@@ -84,7 +80,7 @@ protected:
 	unsigned __int16 m_uPort;
 	std::wstring m_wstrUserName, m_wstrPassword;
 
-public: 
+public: // serialization
 	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags = 0) override
 	{
 		return pStm->SerializeValue (L"addr", m_wstrAddr) &&

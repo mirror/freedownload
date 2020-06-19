@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 template <typename TKey, typename TObj>
 class SerializableObjMap :
@@ -20,12 +16,12 @@ protected:
 	container_t m_items;
 
 protected:
-	
-	
+	// pStm can be used to identify the type of object
+	// no serialization must be done here
 	virtual std::shared_ptr <TObj> create_obj (vmsSerializationIoStream *pStm) = 0;
 
 public:
-	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags ) override
+	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags /* = 0 */) override
 	{
 		TKey id;
 

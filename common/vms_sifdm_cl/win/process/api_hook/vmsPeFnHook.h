@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include <algorithm>
 #include "vmsPeTools.h"
@@ -26,9 +22,9 @@ protected:
 		std::string strImportingModuleName;
 		HMODULE hImportingModule = nullptr;
 		std::string strFunctionName;
-		FARPROC pfnTarget = nullptr; 
-		FARPROC pfnHook = nullptr; 
-		FARPROC pfnOriginal = nullptr; 
+		FARPROC pfnTarget = nullptr; // module's original function from export table
+		FARPROC pfnHook = nullptr; // our function
+		FARPROC pfnOriginal = nullptr; // hooked function; it may not be equal to target one due to another 3d party hooks installed
 	};
 
 public:
@@ -45,7 +41,7 @@ public:
 		HMODULE hMainModule = GetModuleHandle (NULL);
 		HMODULE hThisModule = vmsGetThisModuleHandle ();
 
-		vmsAUTOLOCKSECTION (m_csFunctions); 
+		vmsAUTOLOCKSECTION (m_csFunctions); // lock here for hook function to get a proper address of original fn
 
 		{
 			FunctionInfo fi;
@@ -70,7 +66,7 @@ public:
 
 		vmsAUTOLOCKSECTION_UNLOCK (m_csFunctions);
 
-		
+		// Get the list of modules in this process
 		CToolhelp th (TH32CS_SNAPMODULE, GetCurrentProcessId ());
 
 		MODULEENTRY32 me = { sizeof (me) };
@@ -79,7 +75,7 @@ public:
 			if (me.hModule != hThisModule && me.hModule != hMainModule)
 			{
 				if (!vmsCheckModuleHandleValid (me.hModule))
-					continue; 
+					continue; // todo: make it better (wait for the module to be loaded)
 				if (skipWindowsCompatibleModules && isWindowsCompatibleLayerModule(me.hModule))
 					continue;
 				if (HookFunctionInModule (me.hModule, r_fi))
@@ -120,14 +116,14 @@ protected:
 		if (m_petools.ReplaceIATfunc (mod, fi.strImportingModuleName.c_str (), 
 			fi.strFunctionName.c_str (), fi.pfnTarget, fi.pfnHook, &pfnOriginal))
 		{
-			
+			//assert (fi.pfnOriginal == NULL || pfnOriginal == NULL || pfnOriginal == fi.pfnOriginal); // it can differ btw... but get some notification just in case...
 			result = true;
 		}
 		if (m_petools.ReplaceDIATfunc (mod, fi.strImportingModuleName.c_str (),
 			fi.strFunctionName.c_str (), fi.pfnTarget, fi.pfnHook, 
 			pfnOriginal ? nullptr : &pfnOriginal))
 		{
-			
+			//assert (fi.pfnOriginal == NULL || pfnOriginal == NULL || pfnOriginal == fi.pfnOriginal); // it can differ btw... but get some notification just in case...
 			result = true;
 		}
 		if (result)
@@ -226,7 +222,7 @@ public:
 		return m_vFunctions[nIndex].pfnTarget;
 	}
 
-	
+	// can be called to hook all functions in the new loaded module
 	void onNewModuleLoaded(HMODULE hModule)
 	{
 		vmsAUTOLOCKSECTION (m_csFunctions);
@@ -239,8 +235,8 @@ public:
 
 	typedef std::set <HMODULE> loaded_modules_data_t;
 
-	
-	
+	// can be called to hook all functions in the new loaded module
+	// supports modules with additional dependencies
 
 	void onBeforeNewModuleLoaded (loaded_modules_data_t &data)
 	{
@@ -281,7 +277,7 @@ public:
 		}
 	}
 
-	
+	// returns NULL if the function was not hooked or address of the hook function otherwise
 	FARPROC onGetProcAddress(HMODULE hModule, LPCSTR pszFuncName)
 	{
 		if (DWORD_PTR (pszFuncName) <= _UI16_MAX)
@@ -304,7 +300,7 @@ protected:
 	{
 		HMODULE hThisModule = vmsGetThisModuleHandle ();
 
-		
+		// Get the list of modules in this process
 		CToolhelp th (TH32CS_SNAPMODULE, GetCurrentProcessId ());
 
 		MODULEENTRY32 me = { sizeof (me) };

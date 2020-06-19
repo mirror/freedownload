@@ -1,9 +1,6 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
+// make FILETIME easy serializable
 template <class TStream>
 TStream& operator<<(TStream& stm, const FILETIME& ft)
 {

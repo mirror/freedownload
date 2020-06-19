@@ -1,9 +1,6 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
+// function is taken from ATL code with some modification
 inline LONG vmsRegKeyQueryStringValue (CRegKey& key, LPCTSTR pszValueName,
 	LPTSTR pszValue, ULONG* pnChars)
 {
@@ -32,8 +29,8 @@ inline LONG vmsRegKeyQueryStringValue (CRegKey& key, LPCTSTR pszValueName,
 	{
 		if(nBytes!=0)
 		{
-			
-			
+			// modification: do not validate data
+			// just put terminating 0 at the end
 			const auto pos = nBytes/sizeof(TCHAR);
 			if (pos < *pnChars)
 				pszValue [pos] = 0;

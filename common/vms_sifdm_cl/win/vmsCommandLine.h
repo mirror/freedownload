@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #include "../serialization/vmsSerializable.h"
@@ -137,7 +133,15 @@ public:
 		}
 		else
 		{
-			
+			/*
+			The file name is ambiguous. For example, consider the string 
+			"c:\program files\sub dir\program name". This string can be interpreted in a number of ways. 
+			The system tries to interpret the possibilities in the following order:
+				c:\program.exe files\sub dir\program name
+				c:\program files\sub.exe dir\program name
+				c:\program files\sub dir\program.exe name
+				c:\program files\sub dir\program name.exe
+			*/
 
 			while (*ptsz == ' ')
 				ptsz++;
@@ -151,7 +155,7 @@ public:
 				{
 					if (vmsFileUtil::SearchPath (m_tstrExe.c_str (), _T (".exe"), &m_tstrExe))
 					{
-						bConvertToLongPath = false; 
+						bConvertToLongPath = false; //path is long already
 						break;
 					}
 				}
@@ -171,7 +175,7 @@ public:
 
 					if (m_tstrExe.length () > 4 && 
 							_tcsicmp (m_tstrExe.c_str ()+m_tstrExe.length ()-4, _T (".exe")) == 0)
-						break; 
+						break; // it's exe, but it does not exist on the disk
 
 					while (*ptsz == ' ')
 						m_tstrExe += *ptsz++;
@@ -216,13 +220,13 @@ public:
 	{
 		RunElevatedIfRequired		= 1,
 		WaitForCompletion			= 1 << 1,
-		
+		// EXE can be with no path to it specified
 		SearchPathIfRequired		= 1 << 2,
-		WaitForChildCompletion		= 1 << 3, 
+		WaitForChildCompletion		= 1 << 3, // valid only if WaitForCompletion is specified also
 		RunAssociatedAppIfNotExe	= 1 << 4,
 		RunElevated					= 1 << 5,
 	};
-	
+	// dwFlags - ORed combination of ExecutionFlags
 	bool Execute(DWORD dwFlags = 0, LPDWORD pdwProcessExitCode = nullptr, 
 		HANDLE *phProcess = nullptr, vmsError *error = nullptr,
 		std::function <bool()> abort_waiting = std::function <bool()> ()) const
@@ -389,7 +393,7 @@ public:
 		return true;
 	}
 
-	
+	// returns: false if the waiting is aborted
 	bool process_wait_including_children (HANDLE process, HANDLE abort_waiting_event)
 	{
 		assert (process);
@@ -496,7 +500,7 @@ protected:
 	}
 
 public:
-	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags ) override
+	virtual bool Serialize (vmsSerializationIoStream *pStm, unsigned flags /* = 0 */) override
 	{
 		return pStm->SerializeValue (L"cmdlineEXE", m_tstrExe) &&
 			pStm->SerializeValue (L"cmdlineArgs", m_tstrArgs);

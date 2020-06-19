@@ -1,11 +1,21 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
+/******************************************************************************
+Module:  Toolhelp.h
+Notices: Copyright (c) 2000 Jeffrey Richter
+******************************************************************************/
+
 
 #pragma once
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 #include <tlhelp32.h>
 #include <tchar.h>
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 class CToolhelp {
 private:
@@ -33,10 +43,10 @@ public:
    BOOL HeapListNext(PHEAPLIST32 phl) const;
    int  HowManyHeaps() const;
 
-   
-   
-   
-   
+   // Note: The heap block functions do not reference a snapshot and
+   // just walk the process's heap from the beginning each time. Infinite 
+   // loops can occur if the target process changes its heap while the
+   // functions below are enumerating the blocks in the heap.
    BOOL HeapFirst(PHEAPENTRY32 phe, DWORD dwProcessID, 
       UINT_PTR dwHeapID) const;
    BOOL HeapNext(PHEAPENTRY32 phe) const;
@@ -49,17 +59,29 @@ public:
       PVOID pvBuffer, DWORD cbRead, SIZE_T *pNumberOfBytesRead = NULL);
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 inline CToolhelp::CToolhelp(DWORD dwFlags, DWORD dwProcessID) {
 
    m_hSnapshot = INVALID_HANDLE_VALUE;
    CreateSnapshot(dwFlags, dwProcessID);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 inline CToolhelp::~CToolhelp() {
 
    if (m_hSnapshot != INVALID_HANDLE_VALUE)
       CloseHandle(m_hSnapshot);
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 inline BOOL CToolhelp::CreateSnapshot(DWORD dwFlags, DWORD dwProcessID) {
 
@@ -74,18 +96,22 @@ inline BOOL CToolhelp::CreateSnapshot(DWORD dwFlags, DWORD dwProcessID) {
    return(m_hSnapshot != INVALID_HANDLE_VALUE);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 inline BOOL CToolhelp::EnableDebugPrivilege(BOOL fEnable) {
 
-   
-   
-   BOOL fOk = FALSE;    
+   // Enabling the debug privilege allows the application to see
+   // information about service applications
+   BOOL fOk = FALSE;    // Assume function fails
    HANDLE hToken;
 
-   
+   // Try to open this process's access token
    if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, 
       &hToken)) {
 
-      
+      // Attempt to modify the "Debug" privilege
       TOKEN_PRIVILEGES tp;
       tp.PrivilegeCount = 1;
       LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &tp.Privileges[0].Luid);
@@ -97,6 +123,10 @@ inline BOOL CToolhelp::EnableDebugPrivilege(BOOL fEnable) {
    return(fOk);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 inline BOOL CToolhelp::ReadProcessMemory(DWORD dwProcessID, 
    LPCVOID pvBaseAddress, PVOID pvBuffer, DWORD cbRead, 
    SIZE_T *pNumberOfBytesRead) {
@@ -105,15 +135,20 @@ inline BOOL CToolhelp::ReadProcessMemory(DWORD dwProcessID,
       cbRead, pNumberOfBytesRead));
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 inline BOOL CToolhelp::ProcessFirst(PPROCESSENTRY32 ppe) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
 	if (m_hSnapshot == INVALID_HANDLE_VALUE)
 		return FALSE;
    BOOL fOk = Process32First(m_hSnapshot, ppe);
    if (fOk && (ppe->th32ProcessID == 0))
-      fOk = ProcessNext(ppe); 
+      fOk = ProcessNext(ppe); // Remove the "[System Process]" (PID = 0)
    return(fOk);
 }
+
 
 inline BOOL CToolhelp::ProcessNext(PPROCESSENTRY32 ppe) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
@@ -121,9 +156,10 @@ inline BOOL CToolhelp::ProcessNext(PPROCESSENTRY32 ppe) const {
 		return FALSE;
    BOOL fOk = Process32Next(m_hSnapshot, ppe);
    if (fOk && (ppe->th32ProcessID == 0))
-      fOk = ProcessNext(ppe); 
+      fOk = ProcessNext(ppe); // Remove the "[System Process]" (PID = 0)
    return(fOk);
 }
+
 
 inline BOOL CToolhelp::ProcessFind(DWORD dwProcessId, PPROCESSENTRY32 ppe) 
    const {
@@ -136,12 +172,17 @@ inline BOOL CToolhelp::ProcessFind(DWORD dwProcessId, PPROCESSENTRY32 ppe)
    return(fFound);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 inline BOOL CToolhelp::ModuleFirst(PMODULEENTRY32 pme) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
 	if (m_hSnapshot == INVALID_HANDLE_VALUE)
 		return FALSE;
    return(Module32First(m_hSnapshot, pme));
 }
+
 
 inline BOOL CToolhelp::ModuleNext(PMODULEENTRY32 pme) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
@@ -170,6 +211,10 @@ inline BOOL CToolhelp::ModuleFind(PTSTR pszModName, PMODULEENTRY32 pme) const {
    return(fFound);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 inline BOOL CToolhelp::ThreadFirst(PTHREADENTRY32 pte) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
 	if (m_hSnapshot == INVALID_HANDLE_VALUE)
@@ -177,12 +222,17 @@ inline BOOL CToolhelp::ThreadFirst(PTHREADENTRY32 pte) const {
    return(Thread32First(m_hSnapshot, pte));
 }
 
+
 inline BOOL CToolhelp::ThreadNext(PTHREADENTRY32 pte) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
 	if (m_hSnapshot == INVALID_HANDLE_VALUE)
 		return FALSE;
    return(Thread32Next(m_hSnapshot, pte));
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 inline int CToolhelp::HowManyHeaps() const {
 
@@ -192,6 +242,7 @@ inline int CToolhelp::HowManyHeaps() const {
       nHowManyHeaps++;
    return(nHowManyHeaps);
 }
+
 
 inline int CToolhelp::HowManyBlocksInHeap(DWORD dwProcessID, 
    DWORD dwHeapID) const {
@@ -204,6 +255,7 @@ inline int CToolhelp::HowManyBlocksInHeap(DWORD dwProcessID,
    return(nHowManyBlocksInHeap);
 }
 
+
 inline BOOL CToolhelp::HeapListFirst(PHEAPLIST32 phl) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
 	if (m_hSnapshot == INVALID_HANDLE_VALUE)
@@ -211,12 +263,14 @@ inline BOOL CToolhelp::HeapListFirst(PHEAPLIST32 phl) const {
    return(Heap32ListFirst(m_hSnapshot, phl));
 }
 
+
 inline BOOL CToolhelp::HeapListNext(PHEAPLIST32 phl) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
 	if (m_hSnapshot == INVALID_HANDLE_VALUE)
 		return FALSE;
    return(Heap32ListNext(m_hSnapshot, phl));
 }
+
 
 inline BOOL CToolhelp::HeapFirst(PHEAPENTRY32 phe, DWORD dwProcessID, 
    UINT_PTR dwHeapID) const {
@@ -226,6 +280,7 @@ inline BOOL CToolhelp::HeapFirst(PHEAPENTRY32 phe, DWORD dwProcessID,
    return(Heap32First(phe, dwProcessID, dwHeapID));
 }
 
+
 inline BOOL CToolhelp::HeapNext(PHEAPENTRY32 phe) const {
 	assert (m_hSnapshot != INVALID_HANDLE_VALUE);
 	if (m_hSnapshot == INVALID_HANDLE_VALUE)
@@ -233,9 +288,11 @@ inline BOOL CToolhelp::HeapNext(PHEAPENTRY32 phe) const {
    return(Heap32Next(phe));
 }
 
+
 inline BOOL CToolhelp::IsAHeap(HANDLE hProcess, PVOID pvBlock, 
    PDWORD pdwFlags) const {
 
+// This macro returns TRUE if a number is between two others.
 #define chINRANGE(low, Num, High) (((low) <= (Num)) && ((Num) <= (High)))
 
    HEAPLIST32 hl = { sizeof(hl) };
@@ -256,3 +313,5 @@ inline BOOL CToolhelp::IsAHeap(HANDLE hProcess, PVOID pvBlock,
    return(FALSE);
 }
 
+
+//////////////////////////////// End of File //////////////////////////////////

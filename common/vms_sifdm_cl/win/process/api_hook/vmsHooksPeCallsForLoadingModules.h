@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "vmsHooksPeCalls.h"
 #include "../../../threadsafe/win/vmsTls.h"
@@ -19,7 +15,7 @@ public:
 		uint32_t flags = 0) :
 		vmsHooksPeCalls (hooker) 
 	{
-		assert (!ms_hooker); 
+		assert (!ms_hooker); // singleton
 		ms_hooker = hooker;
 		
 		if (!(flags & DontHookGetProcAddress))
@@ -120,9 +116,9 @@ protected:
 		FARPROC pfn = ms_hooker->onGetProcAddress (hModule, pszProcName);
 		if (pfn)
 		{
-			
-			
-			
+			// make sure it's not a madness call
+			// (e.g. Firefox make such calls)
+			// if not - return hooked fn, if yes (oops) - return the original one to avoid possible crash
 			if (!(stricmp(pszProcName, "GetProcAddress") == 0 && hModule == GetModuleHandle(L"kernel32.dll")))
 				return pfn;
 		}

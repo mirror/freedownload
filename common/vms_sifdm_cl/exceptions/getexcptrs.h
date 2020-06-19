@@ -1,27 +1,24 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 
 #if _MSC_VER>=1300
 #include <rtcapi.h>
 #endif
 #ifndef _AddressOfReturnAddress
-
+// Taken from: http://msdn.microsoft.com/en-us/library/s975zw7k(VS.71).aspx
 #ifdef __cplusplus
 #define EXTERNC extern "C"
 #else
 #define EXTERNC
 #endif
-
+// _ReturnAddress and _AddressOfReturnAddress should be prototyped before use 
 EXTERNC void * _AddressOfReturnAddress(void);
 EXTERNC void * _ReturnAddress(void);
 #endif 
 
+// The following function retrieves exception info
 inline void GetExceptionPointers (DWORD dwExceptionCode, EXCEPTION_POINTERS** ppExceptionPointers)
 {
-	
+	// The following code was taken from VC++ 8.0 CRT (invarg.c: line 104)
 
 	EXCEPTION_RECORD ExceptionRecord;
 	CONTEXT ContextRecord;
@@ -52,11 +49,11 @@ inline void GetExceptionPointers (DWORD dwExceptionCode, EXCEPTION_POINTERS** pp
 #pragma warning(pop)
 	ContextRecord.Ebp = *((ULONG *)_AddressOfReturnAddress()-1);
 #elif defined (_IA64_) || defined (_AMD64_)
-	
+	/* Need to fill up the Context in IA64 and AMD64. */
 	RtlCaptureContext(&ContextRecord);
-#else  
+#else  /* defined (_IA64_) || defined (_AMD64_) */
 	ZeroMemory(&ContextRecord, sizeof(ContextRecord));
-#endif  
+#endif  /* defined (_IA64_) || defined (_AMD64_) */
 	ZeroMemory(&ExceptionRecord, sizeof(EXCEPTION_RECORD));
 	ExceptionRecord.ExceptionCode = dwExceptionCode;
 	ExceptionRecord.ExceptionAddress = _ReturnAddress();

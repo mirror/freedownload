@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "SerializableObjMapById.h"
 template <typename TObj>
@@ -11,7 +7,7 @@ struct SerializableObjMapByIdWithRefsItem :
 	uint32_t refs = 0;
 	std::shared_ptr <TObj> obj;
 	virtual bool Serialize (vmsSerializationIoStream *pStm,
-		unsigned flags ) override
+		unsigned flags /* = 0 */) override
 	{
 		assert (obj);
 		return pStm->SerializeValueS (L"item-refs", refs) &&

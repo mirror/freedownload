@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "../Toolhelp.h"
 #include "../../../../vms_sifdm_cl/win/process/util.h"
@@ -23,7 +19,7 @@ public:
 
 		PIMAGE_EXPORT_DIRECTORY pExportDir = RvaToAddr (PIMAGE_EXPORT_DIRECTORY, hTarget, expDir.VirtualAddress);
 
-		
+		//LPCSTR pszModName = RvaToAddr (LPCSTR, hTarget, pExportDir->Name);
 
 		LPDWORD pdwFuncAddrs = RvaToAddr (LPDWORD, hTarget, pExportDir->AddressOfFunctions);
 
@@ -48,9 +44,9 @@ public:
 
 	static bool ReplaceDIATfunc (HMODULE hTarget, LPCSTR pszImportingModuleName, LPCSTR pszTargetFuncName, FARPROC pfnTarget, FARPROC pfnNew, FARPROC *ppfnOriginal)
 	{
-		
-		
-		
+		// we need to call module's function instead of calling delayLoadHelper each time
+		// caller must provide its address (by loading module and getting the function's address) or
+		// we need to do it here (? ; don't think so, btw...)
 		assert (pfnTarget);
 		if (!pfnTarget)
 			return false;
@@ -94,7 +90,7 @@ public:
 					{
 						PIMAGE_IMPORT_BY_NAME pName = RvaToAddr (PIMAGE_IMPORT_BY_NAME, hTarget, pNameThunk->u1.AddressOfData - offset);
 						assert (pName != NULL);
-						
+						//LOG ("  module's function: %s", (LPCSTR)pName->Name);
 						if (!_stricmp ((LPCSTR)pName->Name, pszTargetFuncName))
 							bNeedToReplace = true;
 					}
@@ -108,8 +104,8 @@ public:
 					if (!pfnOriginal)
 					{
 						auto pfn = (FARPROC)pAddrThunk->u1.Function;
-						
-						
+						// we need to check patching function's module here
+						// If it belongs to the target module - it's a delayLoadHelper
 						if (vmsModuleFromAddress (pfn) != hTarget)
 							pfnOriginal = pfn;
 					}
@@ -131,9 +127,9 @@ public:
 		return replaced;
 	}
 
-	
-	
-	
+	// either pfnTarget or pszTargetFuncName must not be NULL
+	// ppfnOriginal, out: original address of the function
+	// pfnTarget - can be NULL. It's useful in case of dummy DLL redirectors.
 	bool ReplaceIATfunc (HMODULE hTarget, LPCSTR pszImportingModuleName, 
 		LPCSTR pszTargetFuncName, FARPROC pfnTarget, FARPROC pfnNew, FARPROC *ppfnOriginal)
 	{
@@ -168,9 +164,9 @@ public:
 		{
 			LPCSTR pszModName = RvaToAddr (LPCSTR, hTarget, pImportDesc->Name);
 
-			
-			
-			
+			// we will replace IAT entries for module different from pszImportingModuleName in case
+			// the function address of entry points to the target function
+			// but, of course, we can't search by name if IAT's module name is not the target module name
 			bool bSearchOnlyByAddr = _stricmp (pszModName, pszImportingModuleName) != 0;
 
 			PIMAGE_THUNK_DATA pThunk = RvaToAddr (PIMAGE_THUNK_DATA, hTarget, pImportDesc->FirstThunk);
@@ -196,7 +192,7 @@ public:
 							{
 								PIMAGE_IMPORT_BY_NAME pName = RvaToAddr (PIMAGE_IMPORT_BY_NAME, hTarget, pOriginalThunk->u1.AddressOfData);
 								assert (pName != NULL);
-								
+								//LOG ("  module's function: %s", (LPCSTR)pName->Name);
 								if (!_stricmp ((LPCSTR)pName->Name, pszTargetFuncName))
 									bNeedToReplace = true;
 							}
@@ -205,7 +201,7 @@ public:
 						}
 						else
 						{
-							
+							//LOG ("  module's function: %s", pFuncNames->vModules [iImportingModule][iFunction].c_str ());
 							if (!_stricmp (pszTargetFuncName, pFuncNames->vModules [iImportingModule] [iFunction].c_str ()))
 								bNeedToReplace = true;
 						}
@@ -276,7 +272,7 @@ public:
 	}
 
 protected:
-	
+	// some modules does not have original thunk specified. In such a case we need to load it from disk (and cache in memory for further use)
 	bool LoadModuleIATOriginalFirstThunk(HMODULE hModule)
 	{
 		CachedIatFuncNames cfn;
@@ -315,7 +311,7 @@ protected:
 			if (!sectHdr.SizeOfRawData)
 				continue;
 
-			
+			// one section can contain several data directories (e.g. UPX does so)
 			if (sectHdr.VirtualAddress <= impDir.VirtualAddress &&
 				sectHdr.VirtualAddress + sectHdr.SizeOfRawData > impDir.VirtualAddress)
 			{
@@ -343,7 +339,7 @@ protected:
 
 		for (; pImportDesc->Name; pImportDesc++)
 		{
-			
+			//LPCSTR pszModName = IatRvaToAddr (LPCSTR, pImportDesc->Name);
 
 			std::vector <std::string> vFuncNames;
 
@@ -382,7 +378,7 @@ protected:
 	struct CachedIatFuncNames
 	{
 		HMODULE hModule;
-		
+		// array of symbol names for the each module hModule imports
 		std::vector <std::vector <std::string> > vModules;
 	};
 	std::vector <CachedIatFuncNames> m_vIatFuncNames;

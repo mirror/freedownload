@@ -1,7 +1,3 @@
-/*
-  Free Download Manager Copyright (c) 2003-2016 FreeDownloadManager.ORG
-*/
-
 #pragma once
 #include "vmsHttpParser.h"
 
@@ -71,6 +67,6 @@ public:
 
 protected:
 	RequestType m_enRT;
-	std::string m_strPath; 
+	std::string m_strPath; // request path or full url
 	std::string m_strHttpVersion;
 };
